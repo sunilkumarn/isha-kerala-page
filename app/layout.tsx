@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Isha Kerala",
+  title: "Welcome to Isha kerala page",
   description: "Minimal Next.js + Supabase starter",
+  icons: {
+    icon: "/isha-favicon.ico",
+  },
 };
 
 export default function RootLayout({

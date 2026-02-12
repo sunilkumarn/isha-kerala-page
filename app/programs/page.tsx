@@ -36,13 +36,14 @@ export default async function ProgramsPage() {
       <main className="flex-1">
         <section className="bg-[#1F2A63]">
           <div className="mx-auto max-w-6xl px-6 py-16 text-center">
+            <h3 className="mx-auto mt-6 max-w-2xl text-lg text-white/80 ">
+              Welcome to the Isha kerala home page.
+            </h3>
+            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
+            <br></br>
             <h1 className="font-serif text-4xl tracking-tight text-white sm:text-5xl">
               Upcoming Programs
             </h1>
-            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
-            <p className="mx-auto mt-6 max-w-2xl text-sm text-white/80 sm:text-base">
-              Inner transformation for a more conscious life
-            </p>
           </div>
         </section>
 
