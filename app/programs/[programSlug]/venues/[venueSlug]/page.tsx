@@ -170,15 +170,16 @@ function formatSessionDates(session: Session) {
     return `${startDate} – ${endDate || startDate}`;
   }
 
+  return startDate;
+}
+
+function formatSessionTimeRange(session: Session) {
   const startTime = formatTime(session.start_time);
   const endTime = formatTime(session.end_time);
 
-  if (startTime || endTime) {
-    const timeRange = endTime ? `${startTime || "—"} – ${endTime}` : startTime;
-    return `${startDate} (${timeRange})`;
-  }
-
-  return startDate;
+  if (!startTime && !endTime) return "";
+  if (startTime && endTime) return `${startTime} – ${endTime}`;
+  return startTime || endTime;
 }
 
 function hexToRgba(hex: string, alpha: number) {
@@ -478,22 +479,36 @@ export default async function ProgramVenueSessionsPage({
                         </div>
                         <div className="flex items-start gap-3">
                           <CalendarIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
-                          <div className="flex gap-2">
-                            <dt className="w-20 shrink-0 text-slate-500">Date</dt>
-                            <dd className="font-medium text-slate-700">
-                              {formatSessionDates(session)}
-                            </dd>
+                          <div className="space-y-1">
+                            <div className="flex gap-2">
+                              <dt className="w-20 shrink-0 text-slate-500">Date</dt>
+                              <dd className="font-medium text-slate-700">
+                                {formatSessionDates(session)}
+                              </dd>
+                            </div>
+                            {formatSessionTimeRange(session) ? (
+                              <div className="flex gap-2">
+                                <dt className="w-20 shrink-0 text-slate-500">
+                                  Time
+                                </dt>
+                                <dd className="font-medium text-slate-700">
+                                  {formatSessionTimeRange(session)}
+                                </dd>
+                              </div>
+                            ) : null}
                           </div>
                         </div>
-                        <div className="flex items-start gap-3">
-                          <LanguageIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
-                          <div className="flex gap-2">
-                            <dt className="w-20 shrink-0 text-slate-500">Language</dt>
-                            <dd className="font-medium text-slate-700">
-                              {session.language ?? "—"}
-                            </dd>
+                        {(session.language && 
+                          <div className="flex items-start gap-3">
+                            <LanguageIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
+                            <div className="flex gap-2">
+                              <dt className="w-20 shrink-0 text-slate-500">Language</dt>
+                              <dd className="font-medium text-slate-700">
+                                {session.language ?? "—"}
+                              </dd>
+                            </div>
                           </div>
-                        </div>
+                        )} 
                         <div className="flex items-start gap-3">
                           <PhoneIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
                           <div className="flex gap-2">
