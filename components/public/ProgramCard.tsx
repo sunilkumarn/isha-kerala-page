@@ -7,6 +7,7 @@ type Program = {
   name: string;
   slug: string;
   image_url?: string | null;
+  updated_at?: string | null;
   sub_text?: string | null;
   details_external?: boolean | null;
   external_link?: string | null;
@@ -50,6 +51,12 @@ export default function ProgramCard({ program }: { program: Program }) {
   const wantsExternal = Boolean(program.details_external);
   const isExternal = wantsExternal && externalHref.length > 0;
 
+  const cacheBustedImageUrl = program.image_url
+    ? `${program.image_url}${program.image_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(
+        program.updated_at ?? ""
+      )}`
+    : null;
+
   const Wrapper = ({
     children,
   }: {
@@ -82,10 +89,10 @@ export default function ProgramCard({ program }: { program: Program }) {
     <article className="h-full overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <Wrapper>
         <div className="relative aspect-[4/3] w-full bg-slate-100">
-          {program.image_url ? (
+          {cacheBustedImageUrl ? (
             // Use <img> to avoid Next image remotePatterns configuration.
             <img
-              src={program.image_url}
+              src={cacheBustedImageUrl}
               alt={program.name}
               className="absolute inset-0 h-full w-full object-cover"
               loading="lazy"

@@ -124,6 +124,7 @@ type Session = {
   programs?: {
     name: string;
     image_url?: string | null;
+    updated_at?: string | null;
     colour?: string | null;
     sub_text?: string | null;
   } | null;
@@ -322,7 +323,7 @@ export default async function ProgramVenueSessionsPage({
       .select(
         `
         *,
-        programs(name, image_url, colour, sub_text),
+        programs(name, image_url, updated_at, colour, sub_text),
         venues(name, slug, google_maps_url, cities(name)),
         contacts(*)
       `
@@ -403,7 +404,9 @@ export default async function ProgramVenueSessionsPage({
                     <div className="relative aspect-[4/3] w-full bg-slate-100">
                       {session.programs?.image_url ? (
                         <Image
-                          src={session.programs.image_url}
+                          src={`${session.programs.image_url}${
+                            session.programs.image_url.includes("?") ? "&" : "?"
+                          }v=${encodeURIComponent(session.programs.updated_at ?? "")}`}
                           alt={session.programs?.name ?? "Program image"}
                           fill
                           className="object-cover"

@@ -9,6 +9,7 @@ type Program = {
   parent_id: string | number | null;
   slug: string;
   image_url?: string | null;
+  updated_at?: string | null;
   sub_text?: string | null;
   details_external?: boolean | null;
   external_link?: string | null;
@@ -43,7 +44,7 @@ export default function ProgramsGridWithPagination({
     try {
       const response = await fetch(
         `/api/programs?offset=${offset}&limit=${pageSize}`,
-        { method: "GET" }
+        { method: "GET", cache: "no-store" }
       );
 
       const json = (await response.json()) as ProgramsApiResponse;

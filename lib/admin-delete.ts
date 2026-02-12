@@ -11,6 +11,7 @@ export async function adminDeleteById(
 ) {
   const response = await fetch("/api/admin/delete", {
     method: "POST",
+    cache: "no-store",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ table, id }),
   });

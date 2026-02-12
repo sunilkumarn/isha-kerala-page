@@ -15,6 +15,7 @@ type City = {
   id: string | number;
   name: string;
   image_url?: string | null;
+  updated_at?: string | null;
 };
 
 const PAGE_SIZE = 20;
@@ -234,7 +235,9 @@ function CitiesPageInner() {
                   <div className="flex items-center gap-4">
                     {city.image_url ? (
                       <img
-                        src={city.image_url}
+                        src={`${city.image_url}${
+                          city.image_url.includes("?") ? "&" : "?"
+                        }v=${encodeURIComponent(city.updated_at ?? "")}`}
                         alt={city.name}
                         className="h-10 w-10 rounded-md border border-[#E2DED3] object-cover"
                       />

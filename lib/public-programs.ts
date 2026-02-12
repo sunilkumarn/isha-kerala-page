@@ -6,6 +6,7 @@ type Program = {
   parent_id: string | number | null;
   slug: string;
   image_url?: string | null;
+  updated_at?: string | null;
   sub_text?: string | null;
   details_external?: boolean | null;
   external_link?: string | null;
@@ -45,7 +46,9 @@ export async function getPublicProgramsFromPublishedSessions(
 
   const { data: externalProgramRows, error: externalProgramsError } = await supabase
     .from("programs")
-    .select("id, name, parent_id, slug, image_url, sub_text, details_external, external_link")
+    .select(
+      "id, name, parent_id, slug, image_url, updated_at, sub_text, details_external, external_link"
+    )
     .eq("details_external", true);
 
   if (externalProgramsError) {
@@ -105,7 +108,7 @@ export async function getPublicProgramsFromPublishedSessions(
     const { data: programRows, error: programsError } = await supabase
       .from("programs")
       .select(
-        "id, name, parent_id, slug, image_url, sub_text, details_external, external_link"
+        "id, name, parent_id, slug, image_url, updated_at, sub_text, details_external, external_link"
       )
       .in("id", programIds);
 
@@ -125,7 +128,7 @@ export async function getPublicProgramsFromPublishedSessions(
       const { data: parentRows, error: parentsError } = await supabase
         .from("programs")
         .select(
-          "id, name, parent_id, slug, image_url, sub_text, details_external, external_link"
+          "id, name, parent_id, slug, image_url, updated_at, sub_text, details_external, external_link"
         )
         .in("id", parentIds);
 

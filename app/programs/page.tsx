@@ -4,12 +4,15 @@ import PublicFooter from "@/components/public/PublicFooter";
 import NeedAssistanceSection from "@/components/public/NeedAssistanceSection";
 import ProgramsGridWithPagination from "@/components/public/ProgramsGridWithPagination";
 
+export const dynamic = "force-dynamic";
+
 type Program = {
   id: string | number;
   name: string;
   parent_id: string | number | null;
   slug: string;
   image_url?: string | null;
+  updated_at?: string | null;
   sub_text?: string | null;
   details_external?: boolean | null;
   external_link?: string | null;

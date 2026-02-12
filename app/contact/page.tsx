@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import PublicFooter from "@/components/public/PublicFooter";
 
+export const dynamic = "force-dynamic";
+
 type Contact = {
   id: string | number;
   name: string;

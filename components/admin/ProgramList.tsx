@@ -4,6 +4,7 @@ type Program = {
   sub_text?: string | null;
   parent_id: string | number | null;
   image_url?: string | null;
+  updated_at?: string | null;
   colour?: string | null;
   details_external?: boolean | null;
   external_link?: string | null;
@@ -90,6 +91,12 @@ function ProgramRow({
   onEdit: (program: Program) => void;
   onDelete: (program: Program) => void;
 }) {
+  const cacheBustedImageUrl = program.image_url
+    ? `${program.image_url}${program.image_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(
+        program.updated_at ?? ""
+      )}`
+    : null;
+
   return (
     <div
       className={`flex items-center justify-between gap-4 rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-4 py-3 ${
@@ -97,9 +104,9 @@ function ProgramRow({
       }`}
     >
       <div className="flex items-center gap-4">
-        {program.image_url ? (
+        {cacheBustedImageUrl ? (
           <img
-            src={program.image_url}
+            src={cacheBustedImageUrl}
             alt={program.name}
             className="h-10 w-10 rounded-md border border-[#E2DED3] object-cover"
           />
