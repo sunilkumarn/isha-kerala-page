@@ -224,27 +224,13 @@ export default async function ProgramVenuesPage({
                 >
                   <div className="-mx-8 -mt-8 mb-6">
                     <div className="relative aspect-[4/3] w-full bg-slate-100">
-                      {city.imageUrl ? (
-                        // Use <img> to avoid Next image remotePatterns configuration.
-                        <img
-                          src={city.imageUrl}
-                          alt={city.cityName}
-                          className="absolute inset-0 h-full w-full object-cover"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-3xl font-semibold text-slate-500">
-                            {city.cityName.trim().slice(0, 2).toUpperCase()}
-                          </div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-3xl font-semibold text-slate-500">
+                          {city.cityName.toUpperCase()}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
-                  <h2 className="text-xl font-semibold text-indigo-950">
-                    {city.cityName}
-                  </h2>
                   <div className="mt-5">
                     <Link
                       href={`/programs/${encodeURIComponent(

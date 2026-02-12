@@ -94,7 +94,6 @@ export default function SessionModal({
   const [registrationsAllowed, setRegistrationsAllowed] = useState(false);
   const [registrationLink, setRegistrationLink] = useState("");
   const [openWithoutRegistration, setOpenWithoutRegistration] = useState(false);
-  const [programSearch, setProgramSearch] = useState("");
 
   const leafPrograms = useMemo(() => {
     const parentIds = new Set(
@@ -107,15 +106,10 @@ export default function SessionModal({
     return programs.filter((program) => !parentIds.has(String(program.id)));
   }, [programs]);
 
-  const filteredPrograms = useMemo(() => {
-    const sorted = [...leafPrograms].sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
-
-    if (!programSearch.trim()) return sorted;
-    const query = programSearch.trim().toLowerCase();
-    return sorted.filter((program) => program.name.toLowerCase().includes(query));
-  }, [leafPrograms, programSearch]);
+  const sortedPrograms = useMemo(
+    () => [...leafPrograms].sort((a, b) => a.name.localeCompare(b.name)),
+    [leafPrograms]
+  );
 
   const sortedVenues = useMemo(
     () => [...venues].sort((a, b) => a.name.localeCompare(b.name)),
@@ -145,7 +139,6 @@ export default function SessionModal({
       setRegistrationsAllowed(Boolean(initialSession?.registrations_allowed));
       setRegistrationLink(initialSession?.registration_link ?? "");
       setOpenWithoutRegistration(Boolean(initialSession?.open_without_registration));
-      setProgramSearch("");
     }
   }, [open, initialSession, venues]);
 
@@ -189,13 +182,6 @@ export default function SessionModal({
       <div className="space-y-5">
         <div className="space-y-2">
           <label className="text-sm font-medium text-[#2B2B2B]">Program</label>
-          <input
-            type="text"
-            value={programSearch}
-            onChange={(event) => setProgramSearch(event.target.value)}
-            placeholder="Search programs"
-            className="w-full rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B] outline-none focus:border-[#8C7A5B]"
-          />
           <select
             value={programId ?? ""}
             onChange={(event) => {
@@ -209,7 +195,7 @@ export default function SessionModal({
             className="w-full rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B]"
           >
             <option value="">Select Program</option>
-            {filteredPrograms.map((program) => (
+            {sortedPrograms.map((program) => (
               <option key={program.id} value={program.id}>
                 {program.name}
               </option>

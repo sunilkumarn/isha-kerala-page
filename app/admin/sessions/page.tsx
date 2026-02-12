@@ -248,8 +248,8 @@ function SessionsPageInner() {
     registrationLink: string;
     openWithoutRegistration: boolean;
   }) => {
-    if (!payload.programId || !payload.venueId || !payload.contactId) {
-      setErrorMessage("Please select a program, venue, and contact.");
+    if (!payload.programId || !payload.venueId) {
+      setErrorMessage("Please select a program and venue.");
       return;
     }
 
@@ -263,7 +263,7 @@ function SessionsPageInner() {
     const sessionPayload = {
       program_id: payload.programId,
       venue_id: payload.venueId,
-      contact_id: payload.contactId,
+      contact_id: payload.contactId ?? null,
       start_date: payload.startDate,
       end_date: payload.endDate || null,
       start_time: payload.startTime || null,
