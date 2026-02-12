@@ -67,7 +67,7 @@ export default async function ContactPage() {
       <main className="flex-1">
         <section className="bg-[#1F2A63]">
           <div className="mx-auto max-w-6xl px-6 py-16 text-center">
-            <h1 className="font-serif text-4xl tracking-tight text-white sm:text-5xl">
+            <h1 className="text-4xl tracking-tight text-white sm:text-5xl">
               Connect with a Volunteer
             </h1>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />

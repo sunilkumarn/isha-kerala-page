@@ -35,8 +35,7 @@ export default function PublicFooter() {
             </div>
 
             <p className="mt-5 max-w-sm text-sm leading-6 text-white/70">
-              Dedicated to raising human consciousness and fostering global harmony
-              through individual transformation.
+            Sadhguru has often said that “society is overripe for a spiritual process.” His fundamental vision is to offer the science of inner wellbeing to every human being – a science that helps a person realize the ultimate potential within. From this vision stem a multitude of projects, programs, and methods, all towards the same aim: to raise every human being to the peak of their potential, so that they are exuberant, all-inclusive, and in harmony within themselves and the world.
             </p>
           </div>
 

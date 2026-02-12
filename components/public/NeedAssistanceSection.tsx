@@ -8,7 +8,7 @@ export default function NeedAssistanceSection({
   return (
     <section className="border-t border-black/5 bg-white">
       <div className="mx-auto max-w-6xl px-6 py-16 text-center sm:py-20">
-        <h2 className="font-serif text-3xl tracking-tight text-[#1F2A63] sm:text-4xl">
+        <h2 className="text-3xl tracking-tight text-[#1F2A63] sm:text-4xl">
           Need Assistance?
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base">

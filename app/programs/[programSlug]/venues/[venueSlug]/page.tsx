@@ -354,7 +354,7 @@ export default async function ProgramVenueSessionsPage({
               Back to Venues
             </Link>
 
-            <h1 className="mt-6 font-serif text-4xl font-semibold tracking-tight md:text-5xl">
+            <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
               {title}
             </h1>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
@@ -410,7 +410,7 @@ export default async function ProgramVenueSessionsPage({
                     </div>
 
                     <div className="p-6">
-                      <h3 className="font-serif text-xl text-slate-900">
+                      <h3 className="text-xl text-slate-900">
                         {session.programs?.name ?? "Program"}
                       </h3>
 

@@ -90,9 +90,7 @@ export default function ProgramsGridWithPagination({
             </div>
 
             <div className="p-6 text-center">
-              <h3 className="font-serif text-xl text-slate-900">
-                {program.name}
-              </h3>
+              <h3 className="text-xl text-slate-900">{program.name}</h3>
 
               <div className="mt-5">
                 <Link

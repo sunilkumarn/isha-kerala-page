@@ -20,7 +20,7 @@ type Venue = {
   address: string | null;
   google_maps_url: string | null;
   city_id: string | number | null;
-  cities?: { name: string } | null;
+  cities?: { name: string; image_url?: string | null } | null;
 };
 
 function getTodayLocalISODate() {
@@ -123,7 +123,7 @@ export default async function ProgramVenuesPage({
     if (venueIds.length > 0) {
       const { data: venueRows, error: venuesError } = await supabase
         .from("venues")
-        .select("*, cities(name)")
+        .select("*, cities(name, image_url)")
         .in("id", venueIds)
         .order("name");
 
@@ -140,6 +140,7 @@ export default async function ProgramVenuesPage({
     type CityCard = {
       cityKey: string;
       cityName: string;
+      imageUrl: string | null;
       venueSlug: string;
     };
 
@@ -147,6 +148,7 @@ export default async function ProgramVenuesPage({
 
     for (const venue of venues) {
       const cityName = venue.cities?.name?.trim() || "Other";
+      const imageUrl = venue.cities?.image_url ?? null;
       const cityKey = venue.city_id ? `city:${String(venue.city_id)}` : `name:${cityName}`;
 
       const preferredSlug = cityName ? slugify(cityName) : null;
@@ -157,6 +159,7 @@ export default async function ProgramVenuesPage({
         map.set(cityKey, {
           cityKey,
           cityName,
+          imageUrl,
           venueSlug: venue.slug,
         });
         continue;
@@ -170,8 +173,11 @@ export default async function ProgramVenuesPage({
         map.set(cityKey, {
           cityKey,
           cityName,
+          imageUrl: existing.imageUrl ?? imageUrl,
           venueSlug: venue.slug,
         });
+      } else if (!existing.imageUrl && imageUrl) {
+        map.set(cityKey, { ...existing, imageUrl });
       }
     }
 
@@ -214,8 +220,28 @@ export default async function ProgramVenuesPage({
               {cityCards.map((city) => (
                 <div
                   key={city.cityKey}
-                  className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm"
+                  className="overflow-hidden rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm"
                 >
+                  <div className="-mx-8 -mt-8 mb-6">
+                    <div className="relative aspect-[4/3] w-full bg-slate-100">
+                      {city.imageUrl ? (
+                        // Use <img> to avoid Next image remotePatterns configuration.
+                        <img
+                          src={city.imageUrl}
+                          alt={city.cityName}
+                          className="absolute inset-0 h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-3xl font-semibold text-slate-500">
+                            {city.cityName.trim().slice(0, 2).toUpperCase()}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <h2 className="text-xl font-semibold text-indigo-950">
                     {city.cityName}
                   </h2>

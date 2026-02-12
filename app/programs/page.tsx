@@ -46,7 +46,7 @@ export default async function ProgramsPage() {
             </h3>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
             <br></br>
-            <h3 className="font-serif text-2xl tracking-tight text-white sm:text-5xl">
+            <h3 className="text-2xl tracking-tight text-white sm:text-5xl">
               Upcoming Programs
             </h3>
           </div>

@@ -4,6 +4,8 @@ import { Suspense, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { adminDeleteById } from "@/lib/admin-delete";
+import { slugify } from "@/lib/slugify";
+import { uploadCityImage } from "@/lib/upload-city-image";
 import Button from "@/components/admin/Button";
 import Pagination from "@/components/admin/Pagination";
 import Modal from "@/components/admin/Modal";
@@ -12,6 +14,7 @@ import ConfirmDialog from "@/components/admin/ConfirmDialog";
 type City = {
   id: string | number;
   name: string;
+  image_url?: string | null;
 };
 
 const PAGE_SIZE = 20;
@@ -28,6 +31,7 @@ function CitiesPageInner() {
   const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cityName, setCityName] = useState("");
+  const [cityImageFile, setCityImageFile] = useState<File | null>(null);
   const [editingCity, setEditingCity] = useState<City | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -93,33 +97,59 @@ function CitiesPageInner() {
     }
 
     setIsSaving(true);
-    const { error } = editingCity
-      ? await supabase
-          .from("cities")
-          .update({ name: trimmedName })
-          .eq("id", editingCity.id)
-      : await supabase.from("cities").insert({ name: trimmedName });
+    try {
+      let imageUrl: string | null = null;
 
-    if (error) {
-      if (!editingCity && error.code === "23505") {
-        setErrorMessage("City already exists");
-      } else {
-        setErrorMessage(error.message);
+      if (cityImageFile) {
+        const { publicUrl } = await uploadCityImage({
+          file: cityImageFile,
+          slug: slugify(trimmedName),
+        });
+        imageUrl = publicUrl;
       }
-      setIsSaving(false);
-      return;
-    }
 
-    setCityName("");
-    setIsModalOpen(false);
-    setEditingCity(null);
-    await fetchCities();
-    setIsSaving(false);
+      const basePayload: { name: string; image_url?: string | null } = {
+        name: trimmedName,
+      };
+
+      if (imageUrl) {
+        basePayload.image_url = imageUrl;
+      }
+
+      const { error } = editingCity
+        ? await supabase.from("cities").update(basePayload).eq("id", editingCity.id)
+        : await supabase.from("cities").insert({
+            ...basePayload,
+            image_url: imageUrl ?? null,
+          });
+
+      if (error) {
+        if (!editingCity && error.code === "23505") {
+          setErrorMessage("City already exists");
+        } else {
+          setErrorMessage(error.message);
+        }
+        setIsSaving(false);
+        return;
+      }
+
+      setCityName("");
+      setCityImageFile(null);
+      setIsModalOpen(false);
+      setEditingCity(null);
+      await fetchCities();
+      setIsSaving(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setErrorMessage(message);
+      setIsSaving(false);
+    }
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setCityName("");
+    setCityImageFile(null);
     setEditingCity(null);
     setErrorMessage(null);
   };
@@ -127,6 +157,7 @@ function CitiesPageInner() {
   const handleEditCity = (city: City) => {
     setEditingCity(city);
     setCityName(city.name);
+    setCityImageFile(null);
     setIsModalOpen(true);
   };
 
@@ -174,6 +205,7 @@ function CitiesPageInner() {
           onClick={() => {
             setEditingCity(null);
             setCityName("");
+            setCityImageFile(null);
             setIsModalOpen(true);
           }}
         >
@@ -199,9 +231,18 @@ function CitiesPageInner() {
                   key={city.id}
                   className="flex items-center justify-between rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-4 py-3 text-sm"
                 >
-                  <span className="font-medium text-[#2B2B2B]">
-                    {city.name}
-                  </span>
+                  <div className="flex items-center gap-4">
+                    {city.image_url ? (
+                      <img
+                        src={city.image_url}
+                        alt={city.name}
+                        className="h-10 w-10 rounded-md border border-[#E2DED3] object-cover"
+                      />
+                    ) : null}
+                    <span className="font-medium text-[#2B2B2B]">
+                      {city.name}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-3 text-xs">
                     <button
                       type="button"
@@ -255,6 +296,24 @@ function CitiesPageInner() {
             />
           </div>
 
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#2B2B2B]">
+              City Image
+            </label>
+            <input
+              type="file"
+              accept="image/jpeg,image/jpg"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null;
+                setCityImageFile(file);
+              }}
+              className="w-full rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B] file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-[#2B2B2B]"
+            />
+            <p className="text-xs text-[#8C7A5B]">
+              Upload an image here. 
+            </p>
+          </div>
+
           {errorMessage ? (
             <p className="text-xs text-red-600">{errorMessage}</p>
           ) : null}
@@ -301,4 +360,3 @@ export default function CitiesPage() {
     </Suspense>
   );
 }
-
