@@ -20,7 +20,7 @@ type Venue = {
   address: string | null;
   google_maps_url: string | null;
   city_id: string | number | null;
-  cities?: { name: string; image_url?: string | null } | null;
+  cities?: { name: string; image_url?: string | null; updated_at?: string | null } | null;
 };
 
 function getTodayLocalISODate() {
@@ -123,7 +123,7 @@ export default async function ProgramVenuesPage({
     if (venueIds.length > 0) {
       const { data: venueRows, error: venuesError } = await supabase
         .from("venues")
-        .select("*, cities(name, image_url)")
+        .select("*, cities(name, image_url, updated_at)")
         .in("id", venueIds)
         .order("name");
 
@@ -141,6 +141,7 @@ export default async function ProgramVenuesPage({
       cityKey: string;
       cityName: string;
       imageUrl: string | null;
+      updatedAt: string | null;
       venueSlug: string;
     };
 
@@ -149,6 +150,7 @@ export default async function ProgramVenuesPage({
     for (const venue of venues) {
       const cityName = venue.cities?.name?.trim() || "Other";
       const imageUrl = venue.cities?.image_url ?? null;
+      const updatedAt = venue.cities?.updated_at ?? null;
       const cityKey = venue.city_id ? `city:${String(venue.city_id)}` : `name:${cityName}`;
 
       const preferredSlug = cityName ? slugify(cityName) : null;
@@ -160,6 +162,7 @@ export default async function ProgramVenuesPage({
           cityKey,
           cityName,
           imageUrl,
+          updatedAt,
           venueSlug: venue.slug,
         });
         continue;
@@ -174,10 +177,11 @@ export default async function ProgramVenuesPage({
           cityKey,
           cityName,
           imageUrl: existing.imageUrl ?? imageUrl,
+          updatedAt: existing.updatedAt ?? updatedAt,
           venueSlug: venue.slug,
         });
       } else if (!existing.imageUrl && imageUrl) {
-        map.set(cityKey, { ...existing, imageUrl });
+        map.set(cityKey, { ...existing, imageUrl, updatedAt: existing.updatedAt ?? updatedAt });
       }
     }
 
@@ -226,7 +230,13 @@ export default async function ProgramVenuesPage({
                     <div
                       className="relative aspect-[4/3] w-full bg-slate-100 bg-cover bg-center bg-no-repeat"
                       style={{
-                        backgroundImage: `url("/city-image.jpeg")`,
+                        backgroundImage: `url("${
+                          city.imageUrl
+                            ? `${city.imageUrl}${city.imageUrl.includes("?") ? "&" : "?"}v=${encodeURIComponent(
+                                city.updatedAt ?? ""
+                              )}`
+                            : "/city-image.jpeg"
+                        }")`,
                       }}
                     >
                       <div className="absolute inset-0 bg-white/85" aria-hidden="true" />
@@ -244,7 +254,7 @@ export default async function ProgramVenuesPage({
                       )}/venues/${encodeURIComponent(city.venueSlug)}`}
                       className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
                     >
-                      Upcoming Programs
+                      View details
                     </Link>
                   </div>
                 </div>
