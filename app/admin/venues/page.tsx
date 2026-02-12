@@ -127,9 +127,19 @@ function VenuesPageInner() {
 
     setIsSaving(true);
 
+    const selectedCityName =
+      cities.find((city) => String(city.id) === String(payload.cityId))?.name ?? "";
+
+    if (!selectedCityName.trim()) {
+      setErrorMessage("Please select a valid city.");
+      setIsSaving(false);
+      return;
+    }
+
     const venuePayload = {
       name: payload.name,
-      slug: slugify(payload.name),
+      // IMPORTANT: venue.slug is used in public routing as the city's slug (city names are unique).
+      slug: slugify(selectedCityName),
       city_id: payload.cityId,
       address: payload.address || null,
       google_maps_url: payload.googleMapsUrl || null,

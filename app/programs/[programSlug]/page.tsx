@@ -216,18 +216,24 @@ export default async function ProgramVenuesPage({
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {cityCards.map((city) => (
                 <div
                   key={city.cityKey}
                   className="overflow-hidden rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm"
                 >
                   <div className="-mx-8 -mt-8 mb-6">
-                    <div className="relative aspect-[4/3] w-full bg-slate-100">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-3xl font-semibold text-slate-500">
-                          {city.cityName.toUpperCase()}
-                        </div>
+                    <div className="flex flex-col items-center justify-center gap-4 bg-slate-50 py-10">
+                      <div className="text-3xl font-semibold text-slate-600">
+                        {city.cityName.toUpperCase()}
+                      </div>
+                      <div className="h-20 w-28 overflow-hidden rounded-lg border border-black/5 bg-white shadow-sm">
+                        <img
+                          src={"/city-image.jpeg"}
+                          alt={`${city.cityName} thumbnail`}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                        />
                       </div>
                     </div>
                   </div>

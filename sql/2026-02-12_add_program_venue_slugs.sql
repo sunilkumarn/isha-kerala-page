@@ -48,19 +48,21 @@ where p.id = r.id
   and (p.slug is null or p.slug = '');
 
 -- Backfill venues.slug
+-- IMPORTANT: venue.slug is the city's slug (city names are unique).
 with base as (
   select
-    id,
+    v.id,
     nullif(
       regexp_replace(
-        regexp_replace(lower(name), '[^a-z0-9]+', '-', 'g'),
+        regexp_replace(lower(c.name), '[^a-z0-9]+', '-', 'g'),
         '(^-|-$)',
         '',
         'g'
       ),
       ''
     ) as base_slug
-  from venues
+  from venues v
+  left join cities c on c.id = v.city_id
 ),
 ranked as (
   select
