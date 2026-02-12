@@ -1,20 +1,98 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import type { SVGProps } from "react";
 
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import PublicFooter from "@/components/public/PublicFooter";
 
 export const dynamic = "force-dynamic";
 
+function VenueIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M12 21s7-4.6 7-11a7 7 0 1 0-14 0c0 6.4 7 11 7 11Z" />
+      <path d="M12 10.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+    </svg>
+  );
+}
+
+function CalendarIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M8 3v3M16 3v3" />
+      <path d="M4.5 9h15" />
+      <path d="M6.5 5.5h11A2 2 0 0 1 19.5 7.5v12A2 2 0 0 1 17.5 21.5h-11A2 2 0 0 1 4.5 19.5v-12A2 2 0 0 1 6.5 5.5Z" />
+    </svg>
+  );
+}
+
+function LanguageIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M4 5h8" />
+      <path d="M8 5v2c0 4-2 7-5 9" />
+      <path d="M6 10c1.2 2.3 3.5 4.3 6 5.5" />
+      <path d="M14 19l4-10 4 10" />
+      <path d="M16 15h4" />
+    </svg>
+  );
+}
+
+function PhoneIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M21 16.5v2a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.3 19.3 0 0 1-6-6A19.8 19.8 0 0 1 1.5 2.9 2 2 0 0 1 3.5.7h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L6.9 8.8a16 16 0 0 0 8.3 8.3l1.7-1.7a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6A2 2 0 0 1 21 16.5Z" />
+    </svg>
+  );
+}
+
 type Program = {
   id: string | number;
   name: string;
+  slug: string;
 };
 
 type Venue = {
   id: string | number;
   name: string;
+  slug: string;
 };
 
 type Contact = {
@@ -51,6 +129,12 @@ function getTodayLocalISODate() {
   const mm = String(now.getMonth() + 1).padStart(2, "0");
   const dd = String(now.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
+}
+
+function looksLikeUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    value
+  );
 }
 
 function formatDate(value?: string | null) {
@@ -107,24 +191,83 @@ function toTelHref(phone?: string | null) {
 export default async function ProgramVenueSessionsPage({
   params,
 }: {
-  params: Promise<{ programId: string; venueId: string }>;
+  params: Promise<{ programSlug: string; venueSlug: string }>;
 }) {
   const supabase = createSupabaseServerClient();
-  const { programId, venueId } = await params;
+  const { programSlug, venueSlug } = await params;
   const today = getTodayLocalISODate();
 
-  const [{ data: program, error: programError }, { data: venue, error: venueError }] =
-    await Promise.all([
-      supabase.from("programs").select("id, name").eq("id", programId).maybeSingle(),
-      supabase.from("venues").select("id, name").eq("id", venueId).maybeSingle(),
-    ]);
+  const programByIdFirst = looksLikeUuid(programSlug);
+  const venueByIdFirst = looksLikeUuid(venueSlug);
+
+  const [
+    { data: programBySlugRows, error: programBySlugError },
+    { data: venueBySlugRows, error: venueBySlugError },
+    programByIdResponse,
+    venueByIdResponse,
+  ] = await Promise.all([
+    supabase
+      .from("programs")
+      .select("id, name, slug")
+      .eq("slug", programSlug)
+      .order("id", { ascending: true })
+      .limit(1),
+    supabase
+      .from("venues")
+      .select("id, name, slug")
+      .eq("slug", venueSlug)
+      .order("id", { ascending: true })
+      .limit(1),
+    programByIdFirst
+      ? supabase
+          .from("programs")
+          .select("id, name, slug")
+          .eq("id", programSlug)
+          .order("id", { ascending: true })
+          .limit(1)
+      : Promise.resolve({ data: null, error: null } as any),
+    venueByIdFirst
+      ? supabase
+          .from("venues")
+          .select("id, name, slug")
+          .eq("id", venueSlug)
+          .order("id", { ascending: true })
+          .limit(1)
+      : Promise.resolve({ data: null, error: null } as any),
+  ]);
+
+  const programBySlug = (programBySlugRows?.[0] ?? null) as Program | null;
+  const venueBySlug = (venueBySlugRows?.[0] ?? null) as Venue | null;
+  const programById = (programByIdResponse?.data?.[0] ?? null) as Program | null;
+  const venueById = (venueByIdResponse?.data?.[0] ?? null) as Venue | null;
+
+  const programError =
+    programBySlugError ?? (programByIdResponse?.error ?? null);
+  const venueError = venueBySlugError ?? (venueByIdResponse?.error ?? null);
 
   if (programError || venueError) {
     console.error("Failed to load program/venue:", programError ?? venueError);
     notFound();
   }
 
+  const program = (programBySlug ?? programById) as Program | null;
+  const venue = (venueBySlug ?? venueById) as Venue | null;
+
   if (!program || !venue) notFound();
+
+  // Backwards compatibility for old ID-based URLs.
+  if ((programByIdFirst || venueByIdFirst) && program.slug && venue.slug) {
+    if (programSlug !== program.slug || venueSlug !== venue.slug) {
+      redirect(
+        `/programs/${encodeURIComponent(program.slug)}/venues/${encodeURIComponent(
+          venue.slug
+        )}`
+      );
+    }
+  }
+
+  const programId = (program as Program).id;
+  const venueId = (venue as Venue).id;
 
   const { data: children, error: childrenError } = await supabase
     .from("programs")
@@ -174,7 +317,7 @@ export default async function ProgramVenueSessionsPage({
         <header className="bg-indigo-950 text-white">
           <div className="mx-auto max-w-6xl px-6 py-14 text-center">
             <Link
-              href={`/programs/${encodeURIComponent(programId)}`}
+              href={`/programs/${encodeURIComponent((program as Program).slug)}`}
               className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
             >
               <span aria-hidden="true">←</span>
@@ -241,25 +384,41 @@ export default async function ProgramVenueSessionsPage({
                       </h3>
 
                       <dl className="mt-4 space-y-2 text-sm text-slate-600">
-                        <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 text-slate-500">Venue</dt>
-                          <dd className="font-medium text-slate-700">
-                            {(venue as Venue).name}
-                          </dd>
+                        <div className="flex items-start gap-3">
+                          <VenueIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
+                          <div className="flex gap-2">
+                            <dt className="w-20 shrink-0 text-slate-500">Venue</dt>
+                            <dd className="font-medium text-slate-700">
+                              {(venue as Venue).name}
+                            </dd>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 text-slate-500">Date</dt>
-                          <dd>{formatSessionDates(session)}</dd>
+                        <div className="flex items-start gap-3">
+                          <CalendarIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
+                          <div className="flex gap-2">
+                            <dt className="w-20 shrink-0 text-slate-500">Date</dt>
+                            <dd className="font-medium text-slate-700">
+                              {formatSessionDates(session)}
+                            </dd>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 text-slate-500">Language</dt>
-                          <dd>{session.language ?? "—"}</dd>
+                        <div className="flex items-start gap-3">
+                          <LanguageIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
+                          <div className="flex gap-2">
+                            <dt className="w-20 shrink-0 text-slate-500">Language</dt>
+                            <dd className="font-medium text-slate-700">
+                              {session.language ?? "—"}
+                            </dd>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 text-slate-500">Phone</dt>
-                          <dd className="font-medium text-slate-700">
-                            {session.contacts?.phone ?? "—"}
-                          </dd>
+                        <div className="flex items-start gap-3">
+                          <PhoneIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
+                          <div className="flex gap-2">
+                            <dt className="w-20 shrink-0 text-slate-500">Phone</dt>
+                            <dd className="font-medium text-slate-700">
+                              {session.contacts?.phone ?? "—"}
+                            </dd>
+                          </div>
                         </div>
                       </dl>
 

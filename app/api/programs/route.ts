@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { getPublicProgramsFromPublishedSessions } from "@/lib/public-programs";
 
 type Program = {
   id: string | number;
   name: string;
   parent_id: string | number | null;
+  slug: string;
   image_url?: string | null;
 };
 
@@ -25,23 +27,16 @@ export async function GET(request: Request) {
 
   const supabase = createSupabaseServerClient();
 
-  // Fetch one extra row to determine whether there's more to load.
-  const { data, error } = await supabase
-    .from("programs")
-    .select("id, name, parent_id, image_url")
-    .is("parent_id", null)
-    .order("name")
-    .range(offset, offset + limit);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const { programs, hasMore } = await getPublicProgramsFromPublishedSessions(
+      supabase,
+      { offset, limit }
+    );
+    return NextResponse.json({ programs, hasMore });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  const rows = (data ?? []) as Program[];
-  const hasMore = rows.length > limit;
-  const programs = hasMore ? rows.slice(0, limit) : rows;
-
-  return NextResponse.json({ programs, hasMore });
 }
 
 

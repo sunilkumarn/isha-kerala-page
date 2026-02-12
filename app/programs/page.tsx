@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { getPublicProgramsFromPublishedSessions } from "@/lib/public-programs";
 import PublicFooter from "@/components/public/PublicFooter";
 import NeedAssistanceSection from "@/components/public/NeedAssistanceSection";
 import ProgramsGridWithPagination from "@/components/public/ProgramsGridWithPagination";
@@ -7,6 +8,7 @@ type Program = {
   id: string | number;
   name: string;
   parent_id: string | number | null;
+  slug: string;
   image_url?: string | null;
 };
 
@@ -19,17 +21,20 @@ export default async function ProgramsPage() {
 
   const PAGE_SIZE = 6;
 
-  // Fetch one extra row to determine whether there's more to load.
-  const { data, error } = await supabase
-    .from("programs")
-    .select("id, name, parent_id, image_url")
-    .is("parent_id", null)
-    .order("name")
-    .range(0, PAGE_SIZE);
+  let programs: Program[] = [];
+  let hasMore = false;
+  let errorMessage: string | null = null;
 
-  const rows = (data ?? []) as Program[];
-  const hasMore = rows.length > PAGE_SIZE;
-  const programs = hasMore ? rows.slice(0, PAGE_SIZE) : rows;
+  try {
+    const result = await getPublicProgramsFromPublishedSessions(supabase, {
+      offset: 0,
+      limit: PAGE_SIZE,
+    });
+    programs = result.programs as Program[];
+    hasMore = result.hasMore;
+  } catch (error) {
+    errorMessage = error instanceof Error ? error.message : String(error);
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F7F6F2]  text-slate-900">
@@ -48,9 +53,9 @@ export default async function ProgramsPage() {
         </section>
 
         <section className="mx-auto max-w-6xl px-6 py-12">
-          {error ? (
+          {errorMessage ? (
             <div className="rounded-xl border border-red-200 bg-white p-6 text-sm text-red-700">
-              Failed to load programs: {error.message}
+              Failed to load programs: {errorMessage}
             </div>
           ) : programs.length === 0 ? (
             <div className="rounded-2xl border border-black/5 bg-white p-10 text-center">

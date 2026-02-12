@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { slugify } from "@/lib/slugify";
 import { generatePastelColor } from "@/lib/colors";
 import Button from "@/components/admin/Button";
 import ProgramList, { buildProgramRows } from "@/components/admin/ProgramList";
@@ -131,11 +132,13 @@ function ProgramsPageInner() {
     const basePayload: {
       name: string;
       parent_id: string | number | null;
+      slug: string;
       image_url?: string | null;
       colour?: string | null;
     } = {
       name: payload.name,
       parent_id: payload.parentId,
+      slug: slugify(payload.name),
     };
 
     if (imageUrl) {

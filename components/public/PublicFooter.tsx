@@ -31,9 +31,6 @@ export default function PublicFooter() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
             <div className="flex items-center gap-3">
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm font-semibold text-white/90">
-                ॐ
-              </div>
               <div className="text-base font-semibold">Isha Kerala</div>
             </div>
 

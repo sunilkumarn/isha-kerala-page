@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { slugify } from "@/lib/slugify";
 import Button from "@/components/admin/Button";
 import Pagination from "@/components/admin/Pagination";
 import VenueModal from "@/components/admin/VenueModal";
@@ -128,6 +129,7 @@ function VenuesPageInner() {
 
     const venuePayload = {
       name: payload.name,
+      slug: slugify(payload.name),
       city_id: payload.cityId,
       address: payload.address || null,
       google_maps_url: payload.googleMapsUrl || null,

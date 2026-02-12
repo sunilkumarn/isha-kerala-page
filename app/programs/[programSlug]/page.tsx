@@ -1,14 +1,21 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import PublicFooter from "@/components/public/PublicFooter";
 
 export const dynamic = "force-dynamic";
 
+type Program = {
+  id: string | number;
+  name: string;
+  slug: string;
+};
+
 type Venue = {
   id: string | number;
   name: string;
+  slug: string;
   address: string | null;
   google_maps_url: string | null;
   city_id: string | number | null;
@@ -23,27 +30,63 @@ function getTodayLocalISODate() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function looksLikeUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    value
+  );
+}
+
 export default async function ProgramVenuesPage({
   params,
 }: {
-  params: Promise<{ programId: string }>;
+  params: Promise<{ programSlug: string }>;
 }) {
   const supabase = createSupabaseServerClient();
-  const { programId } = await params;
+  const { programSlug } = await params;
+  console.log("programSlug", programSlug);
   const today = getTodayLocalISODate();
 
-  const { data: program, error: programError } = await supabase
-    .from("programs")
-    .select("id, name")
-    .eq("id", programId)
-    .maybeSingle();
+  const lookupByIdFirst = looksLikeUuid(programSlug);
 
-  if (programError) {
-    console.error("Failed to load program:", programError);
+
+  const { data: programBySlugRows, error: programBySlugError } = await supabase
+    .from("programs")
+    .select("id, name, slug")
+    .eq("slug", programSlug)
+    .order("id", { ascending: true })
+    .limit(1);
+
+  if (programBySlugError) {
+    console.error("Failed to load program by slug:", programBySlugError);
     notFound();
   }
 
+  const { data: programByIdRows, error: programByIdError } = lookupByIdFirst
+    ? await supabase
+        .from("programs")
+        .select("id, name, slug")
+        .eq("id", programSlug)
+        .order("id", { ascending: true })
+        .limit(1)
+    : { data: null, error: null };
+
+  if (programByIdError) {
+    console.error("Failed to load program by id:", programByIdError);
+    notFound();
+  }
+
+  const programBySlug = (programBySlugRows?.[0] ?? null) as Program | null;
+  const programById = (programByIdRows?.[0] ?? null) as Program | null;
+  const program = (programBySlug ?? programById) as Program | null;
   if (!program) notFound();
+
+  // Backwards compatibility: old URLs used /programs/:programId
+  // If we were hit with an ID, redirect to the canonical slug URL.
+  if (lookupByIdFirst && program.slug && programSlug !== program.slug) {
+    redirect(`/programs/${encodeURIComponent(program.slug)}`);
+  }
+
+  const programId = (program as Program).id;
 
   const { data: children, error: childrenError } = await supabase
     .from("programs")
@@ -56,7 +99,6 @@ export default async function ProgramVenuesPage({
   }
 
   const childIds = (children ?? []).map((child) => child.id);
-
   const programIds = childIds.length > 0 ? childIds : [programId];
 
   let venues: Venue[] = [];
@@ -109,7 +151,7 @@ export default async function ProgramVenuesPage({
             </Link>
 
             <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
-              {program.name} Programs
+              {(program as Program).name} Programs
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-white/80 md:text-base">
               Select your city to explore upcoming sessions
@@ -137,8 +179,8 @@ export default async function ProgramVenuesPage({
                   <div className="mt-5">
                     <Link
                       href={`/programs/${encodeURIComponent(
-                        programId
-                      )}/venues/${encodeURIComponent(String(venue.id))}`}
+                        (program as Program).slug
+                      )}/venues/${encodeURIComponent(venue.slug)}`}
                       className="inline-flex items-center justify-center rounded-full bg-orange-500 px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
                     >
                       Upcoming Programs

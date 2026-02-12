@@ -7,6 +7,7 @@ type Program = {
   id: string | number;
   name: string;
   parent_id: string | number | null;
+  slug: string;
   image_url?: string | null;
 };
 
@@ -95,7 +96,7 @@ export default function ProgramsGridWithPagination({
 
               <div className="mt-5">
                 <Link
-                  href={`/programs/${program.id}`}
+                  href={`/programs/${encodeURIComponent(program.slug)}`}
                   className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-6 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/50 focus:ring-offset-2"
                 >
                   Know More
