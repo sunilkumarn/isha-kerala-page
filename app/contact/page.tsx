@@ -82,11 +82,15 @@ export default async function ContactPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">
-                  Volunteer contacts
+                  Please contact{" "}
+                  <a
+                    href="mailto:kerala@ishayoga.org"
+                    className="font-semibold text-[#1F2A63] underline decoration-[#F28C18]/70 underline-offset-4 transition hover:text-[#141C45] hover:decoration-[#F28C18] focus:outline-none focus:ring-2 focus:ring-[#F28C18]/40 focus:ring-offset-2"
+                  >
+                    kerala@ishayoga.org
+                  </a>{" "}
+                  for any assistance.
                 </h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  Pick your city and connect via WhatsApp, phone, or email.
-                </p>
               </div>
               <Link
                 href="/programs"
@@ -97,7 +101,7 @@ export default async function ContactPage() {
             </div>
           </div>
 
-          {error ? (
+          {/* {error ? (
             <div className="mt-8 rounded-xl border border-red-200 bg-white p-6 text-sm text-red-700">
               Failed to load contacts: {error.message}
             </div>
@@ -175,7 +179,7 @@ export default async function ContactPage() {
                 </section>
               ))}
             </div>
-          )}
+          )} */}
         </section>
       </main>
 
