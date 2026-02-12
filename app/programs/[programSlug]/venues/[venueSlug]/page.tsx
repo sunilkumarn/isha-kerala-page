@@ -87,6 +87,7 @@ type Program = {
   id: string | number;
   name: string;
   slug: string;
+  sub_text?: string | null;
 };
 
 type Venue = {
@@ -124,6 +125,7 @@ type Session = {
     name: string;
     image_url?: string | null;
     colour?: string | null;
+    sub_text?: string | null;
   } | null;
   venues?: {
     name: string;
@@ -235,7 +237,7 @@ export default async function ProgramVenueSessionsPage({
   ] = await Promise.all([
     supabase
       .from("programs")
-      .select("id, name, slug")
+      .select("id, name, slug, sub_text")
       .eq("slug", programSlug)
       .order("id", { ascending: true })
       .limit(1),
@@ -248,7 +250,7 @@ export default async function ProgramVenueSessionsPage({
     programByIdFirst
       ? supabase
           .from("programs")
-          .select("id, name, slug")
+          .select("id, name, slug, sub_text")
           .eq("id", programSlug)
           .order("id", { ascending: true })
           .limit(1)
@@ -320,7 +322,7 @@ export default async function ProgramVenueSessionsPage({
       .select(
         `
         *,
-        programs(name, image_url, colour),
+        programs(name, image_url, colour, sub_text),
         venues(name, slug, google_maps_url, cities(name)),
         contacts(*)
       `
@@ -418,9 +420,16 @@ export default async function ProgramVenueSessionsPage({
                     </div>
 
                     <div className="p-6">
-                      <h3 className="text-xl text-slate-900">
-                        {session.programs?.name ?? "Program"}
-                      </h3>
+                      <div className="text-center">
+                        <h3 className="text-xl text-slate-900">
+                          {session.programs?.name ?? "Program"}
+                        </h3>
+                        {session.programs?.sub_text ? (
+                          <p className="mt-0 text-sm text-slate-600 line-clamp-2">
+                            {session.programs?.sub_text}
+                          </p>
+                        ) : null}
+                      </div>
 
                       {registrationsAllowed || openWithoutRegistration ? (
                         <div className="mt-3 flex flex-wrap gap-2">

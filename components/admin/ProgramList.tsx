@@ -1,6 +1,7 @@
 type Program = {
   id: string | number;
   name: string;
+  sub_text?: string | null;
   parent_id: string | number | null;
   image_url?: string | null;
   colour?: string | null;
@@ -115,6 +116,9 @@ function ProgramRow({
               {program.name}
             </p>
           </div>
+          {program.sub_text ? (
+            <p className="mt-1 text-xs text-slate-500">{program.sub_text}</p>
+          ) : null}
           {indent ? (
             <p className="text-xs text-[#8C7A5B]">Child Program</p>
           ) : null}

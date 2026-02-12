@@ -7,6 +7,7 @@ import Modal from "@/components/admin/Modal";
 type Program = {
   id: string | number;
   name: string;
+  sub_text?: string | null;
   parent_id?: string | number | null;
   image_url?: string | null;
   colour?: string | null;
@@ -21,6 +22,7 @@ type ProgramModalProps = {
   onClose: () => void;
   onSave: (payload: {
     name: string;
+    subText: string;
     parentId: string | number | null;
     file: File | null;
   }) => void;
@@ -36,6 +38,7 @@ export default function ProgramModal({
   onSave,
 }: ProgramModalProps) {
   const [name, setName] = useState("");
+  const [subText, setSubText] = useState("");
   const [parentId, setParentId] = useState<string | number | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
@@ -48,13 +51,14 @@ export default function ProgramModal({
   useEffect(() => {
     if (open) {
       setName(initialProgram?.name ?? "");
+      setSubText(initialProgram?.sub_text ?? "");
       setParentId(initialProgram?.parent_id ?? null);
       setFile(null);
     }
   }, [open, initialProgram]);
 
   const handleSave = () => {
-    onSave({ name: name.trim(), parentId, file });
+    onSave({ name: name.trim(), subText: subText.trim(), parentId, file });
   };
 
   return (
@@ -74,6 +78,20 @@ export default function ProgramModal({
             onChange={(event) => setName(event.target.value)}
             placeholder="e.g., Weekend Yoga Retreat"
             className="w-full rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B] outline-none focus:border-[#8C7A5B]"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-[#2B2B2B]">
+            Sub text (optional)
+          </label>
+          <textarea
+            value={subText}
+            onChange={(event) => setSubText(event.target.value)}
+            maxLength={160}
+            placeholder="Short description shown on program card"
+            rows={3}
+            className="w-full resize-none rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B] outline-none focus:border-[#8C7A5B]"
           />
         </div>
 

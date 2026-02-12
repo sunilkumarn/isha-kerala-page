@@ -9,6 +9,7 @@ type Program = {
   parent_id: string | number | null;
   slug: string;
   image_url?: string | null;
+  sub_text?: string | null;
 };
 
 type ProgramsApiResponse =
@@ -91,6 +92,11 @@ export default function ProgramsGridWithPagination({
 
             <div className="p-6 text-center">
               <h3 className="text-xl text-slate-900">{program.name}</h3>
+              {program.sub_text ? (
+                <p className="mt-0 text-sm text-slate-600 line-clamp-2">
+                  {program.sub_text}
+                </p>
+              ) : null}
 
               <div className="mt-5">
                 <Link

@@ -10,6 +10,7 @@ type Program = {
   parent_id: string | number | null;
   slug: string;
   image_url?: string | null;
+  sub_text?: string | null;
 };
 
 export const metadata = {

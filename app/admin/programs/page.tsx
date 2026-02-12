@@ -16,6 +16,7 @@ import ConfirmDialog from "@/components/admin/ConfirmDialog";
 type Program = {
   id: string | number;
   name: string;
+  sub_text?: string | null;
   parent_id: string | number | null;
   image_url?: string | null;
   colour?: string | null;
@@ -103,6 +104,7 @@ function ProgramsPageInner() {
 
   const handleSaveProgram = async (payload: {
     name: string;
+    subText: string;
     parentId: string | number | null;
     file: File | null;
   }) => {
@@ -139,12 +141,14 @@ function ProgramsPageInner() {
       name: string;
       parent_id: string | number | null;
       slug: string;
+      sub_text: string | null;
       image_url?: string | null;
       colour?: string | null;
     } = {
       name: payload.name,
       parent_id: payload.parentId,
       slug: slugify(payload.name),
+      sub_text: payload.subText ? payload.subText : null,
     };
 
     if (imageUrl) {

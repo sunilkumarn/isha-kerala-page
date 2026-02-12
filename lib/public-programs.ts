@@ -6,6 +6,7 @@ type Program = {
   parent_id: string | number | null;
   slug: string;
   image_url?: string | null;
+  sub_text?: string | null;
 };
 
 function getTodayLocalISODate() {
@@ -53,7 +54,7 @@ export async function getPublicProgramsFromPublishedSessions(
 
   const { data: programRows, error: programsError } = await supabase
     .from("programs")
-    .select("id, name, parent_id, slug, image_url")
+    .select("id, name, parent_id, slug, image_url, sub_text")
     .in("id", programIds);
 
   if (programsError) {
@@ -71,7 +72,7 @@ export async function getPublicProgramsFromPublishedSessions(
   if (parentIds.length > 0) {
     const { data: parentRows, error: parentsError } = await supabase
       .from("programs")
-      .select("id, name, parent_id, slug, image_url")
+      .select("id, name, parent_id, slug, image_url, sub_text")
       .in("id", parentIds);
 
     if (parentsError) {

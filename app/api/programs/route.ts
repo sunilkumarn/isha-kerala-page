@@ -9,6 +9,7 @@ type Program = {
   parent_id: string | number | null;
   slug: string;
   image_url?: string | null;
+  sub_text?: string | null;
 };
 
 function parsePositiveInt(value: string | null, fallback: number) {
