@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { slugify } from "@/lib/slugify";
 import PublicFooter from "@/components/public/PublicFooter";
 
 export const dynamic = "force-dynamic";
@@ -43,11 +44,9 @@ export default async function ProgramVenuesPage({
 }) {
   const supabase = createSupabaseServerClient();
   const { programSlug } = await params;
-  console.log("programSlug", programSlug);
   const today = getTodayLocalISODate();
 
   const lookupByIdFirst = looksLikeUuid(programSlug);
-
 
   const { data: programBySlugRows, error: programBySlugError } = await supabase
     .from("programs")
@@ -137,6 +136,50 @@ export default async function ProgramVenuesPage({
     }
   }
 
+  const cityCards = (() => {
+    type CityCard = {
+      cityKey: string;
+      cityName: string;
+      venueSlug: string;
+    };
+
+    const map = new Map<string, CityCard>();
+
+    for (const venue of venues) {
+      const cityName = venue.cities?.name?.trim() || "Other";
+      const cityKey = venue.city_id ? `city:${String(venue.city_id)}` : `name:${cityName}`;
+
+      const preferredSlug = cityName ? slugify(cityName) : null;
+      const isPreferred = preferredSlug ? venue.slug === preferredSlug : false;
+
+      const existing = map.get(cityKey);
+      if (!existing) {
+        map.set(cityKey, {
+          cityKey,
+          cityName,
+          venueSlug: venue.slug,
+        });
+        continue;
+      }
+
+      const existingIsPreferred = preferredSlug
+        ? existing.venueSlug === preferredSlug
+        : false;
+
+      if (!existingIsPreferred && isPreferred) {
+        map.set(cityKey, {
+          cityKey,
+          cityName,
+          venueSlug: venue.slug,
+        });
+      }
+    }
+
+    return Array.from(map.values()).sort((a, b) =>
+      a.cityName.localeCompare(b.cityName)
+    );
+  })();
+
   return (
     <div className="flex min-h-screen flex-col bg-[#F7F4EE]">
       <main className="flex-1">
@@ -160,7 +203,7 @@ export default async function ProgramVenuesPage({
         </header>
 
         <section className="mx-auto max-w-6xl px-6 py-12">
-          {venues.length === 0 ? (
+          {cityCards.length === 0 ? (
             <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm">
               <p className="text-sm text-gray-600">
                 No upcoming published sessions found for this program yet.
@@ -168,19 +211,19 @@ export default async function ProgramVenuesPage({
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {venues.map((venue) => (
+              {cityCards.map((city) => (
                 <div
-                  key={String(venue.id)}
+                  key={city.cityKey}
                   className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm"
                 >
                   <h2 className="text-xl font-semibold text-indigo-950">
-                    {venue.cities?.name}
+                    {city.cityName}
                   </h2>
                   <div className="mt-5">
                     <Link
                       href={`/programs/${encodeURIComponent(
                         (program as Program).slug
-                      )}/venues/${encodeURIComponent(venue.slug)}`}
+                      )}/venues/${encodeURIComponent(city.venueSlug)}`}
                       className="inline-flex items-center justify-center rounded-full bg-orange-500 px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
                     >
                       Upcoming Programs

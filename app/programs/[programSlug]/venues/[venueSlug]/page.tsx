@@ -93,7 +93,8 @@ type Venue = {
   id: string | number;
   name: string;
   slug: string;
-  cities?: { name: string } | null;
+  google_maps_url?: string | null;
+  cities?: { name: string }[] | null;
 };
 
 type Contact = {
@@ -120,6 +121,12 @@ type Session = {
     name: string;
     image_url?: string | null;
     colour?: string | null;
+  } | null;
+  venues?: {
+    name: string;
+    slug: string;
+    google_maps_url?: string | null;
+    cities?: { name: string }[] | null;
   } | null;
   contacts?: Contact | null;
 };
@@ -189,6 +196,21 @@ function toTelHref(phone?: string | null) {
   return `tel:${trimmed}`;
 }
 
+function toSafeHttpUrl(value?: string | null) {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 export default async function ProgramVenueSessionsPage({
   params,
 }: {
@@ -203,7 +225,7 @@ export default async function ProgramVenueSessionsPage({
 
   const [
     { data: programBySlugRows, error: programBySlugError },
-    { data: venueBySlugRows, error: venueBySlugError },
+    { data: venuesBySlugRows, error: venuesBySlugError },
     programByIdResponse,
     venueByIdResponse,
   ] = await Promise.all([
@@ -215,10 +237,10 @@ export default async function ProgramVenueSessionsPage({
       .limit(1),
     supabase
       .from("venues")
-      .select("id, name, slug, cities(name)")
+      .select("id, name, slug, google_maps_url, cities(name)")
       .eq("slug", venueSlug)
       .order("id", { ascending: true })
-      .limit(1),
+      .limit(500),
     programByIdFirst
       ? supabase
           .from("programs")
@@ -230,7 +252,7 @@ export default async function ProgramVenueSessionsPage({
     venueByIdFirst
       ? supabase
           .from("venues")
-          .select("id, name, slug, cities(name)")
+          .select("id, name, slug, google_maps_url, cities(name)")
           .eq("id", venueSlug)
           .order("id", { ascending: true })
           .limit(1)
@@ -238,13 +260,13 @@ export default async function ProgramVenueSessionsPage({
   ]);
 
   const programBySlug = (programBySlugRows?.[0] ?? null) as Program | null;
-  const venueBySlug = (venueBySlugRows?.[0] ?? null) as Venue | null;
   const programById = (programByIdResponse?.data?.[0] ?? null) as Program | null;
   const venueById = (venueByIdResponse?.data?.[0] ?? null) as Venue | null;
+  const venuesBySlug = (venuesBySlugRows ?? []) as Venue[];
 
   const programError =
     programBySlugError ?? (programByIdResponse?.error ?? null);
-  const venueError = venueBySlugError ?? (venueByIdResponse?.error ?? null);
+  const venueError = venuesBySlugError ?? (venueByIdResponse?.error ?? null);
 
   if (programError || venueError) {
     console.error("Failed to load program/venue:", programError ?? venueError);
@@ -252,23 +274,25 @@ export default async function ProgramVenueSessionsPage({
   }
 
   const program = (programBySlug ?? programById) as Program | null;
-  const venue = (venueBySlug ?? venueById) as Venue | null;
+  const venues = (venueByIdFirst ? (venueById ? [venueById] : []) : venuesBySlug) as Venue[];
 
-  if (!program || !venue) notFound();
+  if (!program || venues.length === 0) notFound();
 
   // Backwards compatibility for old ID-based URLs.
-  if ((programByIdFirst || venueByIdFirst) && program.slug && venue.slug) {
-    if (programSlug !== program.slug || venueSlug !== venue.slug) {
+  // If we were hit with an ID, redirect to the canonical slug URL.
+  if ((programByIdFirst || venueByIdFirst) && program.slug) {
+    const canonicalVenueSlug = venueByIdFirst ? venueById?.slug : venueSlug;
+    if (canonicalVenueSlug && (programSlug !== program.slug || venueSlug !== canonicalVenueSlug)) {
       redirect(
         `/programs/${encodeURIComponent(program.slug)}/venues/${encodeURIComponent(
-          venue.slug
+          canonicalVenueSlug
         )}`
       );
     }
   }
 
   const programId = (program as Program).id;
-  const venueId = (venue as Venue).id;
+  const venueIds = Array.from(new Set(venues.map((v) => v.id)));
 
   const { data: children, error: childrenError } = await supabase
     .from("programs")
@@ -281,22 +305,23 @@ export default async function ProgramVenueSessionsPage({
   }
 
   const childIds = (children ?? []).map((child) => child.id);
-  const programIds = childIds.length > 0 ? childIds : [programId];
+  const programIds = Array.from(new Set([programId, ...childIds]));
 
   let sessions: Session[] = [];
   let sessionsErrorMessage: string | null = null;
 
-  if (programIds.length > 0) {
+  if (programIds.length > 0 && venueIds.length > 0) {
     const { data: sessionRows, error: sessionsError } = await supabase
       .from("sessions")
       .select(
         `
         *,
         programs(name, image_url, colour),
+        venues(name, slug, google_maps_url, cities(name)),
         contacts(*)
       `
       )
-      .eq("venue_id", venueId)
+      .in("venue_id", venueIds)
       .in("program_id", programIds)
       .eq("is_published", true)
       .gte("start_date", today)
@@ -310,7 +335,10 @@ export default async function ProgramVenueSessionsPage({
     }
   }
 
-  const venueCityName = (venue as Venue).cities?.name ?? (venue as Venue).name;
+  const venueCityName =
+    venues.find((v) => v.cities?.[0]?.name)?.cities?.[0]?.name ??
+    venues[0]?.cities?.[0]?.name ??
+    venueSlug;
   const title = `${(program as Program).name} in ${venueCityName}`;
 
   return (
@@ -354,6 +382,7 @@ export default async function ProgramVenueSessionsPage({
                   ? hexToRgba(session.programs.colour, 0.08)
                   : null;
                 const telHref = toTelHref(session.contacts?.phone);
+                const mapsHref = toSafeHttpUrl(session.venues?.google_maps_url);
 
                 return (
                   <article
@@ -391,7 +420,33 @@ export default async function ProgramVenueSessionsPage({
                           <div className="flex gap-2">
                             <dt className="w-20 shrink-0 text-slate-500">Venue</dt>
                             <dd className="font-medium text-slate-700">
-                              {(venue as Venue).name}
+                              <span className="flex flex-wrap items-center gap-2">
+                                <span>{session.venues?.name ?? "—"}</span>
+                                {mapsHref ? (
+                                  <a
+                                    href={mapsHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center rounded-full border border-slate-200 bg-white/70 px-2 py-0.5 text-xs font-semibold text-slate-700 hover:bg-white hover:text-slate-900"
+                                    aria-label={`Open ${session.venues?.name ?? "venue"} on Google Maps`}
+                                  >
+                                    Open in maps
+                                     <svg
+                                      viewBox="0 0 24 24"
+                                      aria-hidden="true"
+                                      className="h-4 w-4"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="1.6"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <path d="M12 21s7-4.5 7-10a7 7 0 1 0-14 0c0 5.5 7 10 7 10Z" />
+                                      <path d="M12 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+                                    </svg>
+                                  </a>
+                                ) : null}
+                              </span>
                             </dd>
                           </div>
                         </div>
