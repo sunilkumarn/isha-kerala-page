@@ -32,18 +32,18 @@ export default async function ProgramsPage() {
   const programs = hasMore ? rows.slice(0, PAGE_SIZE) : rows;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7F6F2] text-slate-900">
+    <div className="flex min-h-screen flex-col bg-[#F7F6F2]  text-slate-900">
       <main className="flex-1">
-        <section className="bg-[#1F2A63]">
+        <section className="bg-[#1F2A63] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/sadhguru.jpg')" }}>
           <div className="mx-auto max-w-6xl px-6 py-16 text-center">
             <h3 className="mx-auto mt-6 max-w-2xl text-lg text-white/80 ">
               Welcome to the Isha kerala home page.
             </h3>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
             <br></br>
-            <h1 className="font-serif text-4xl tracking-tight text-white sm:text-5xl">
+            <h3 className="font-serif text-2xl tracking-tight text-white sm:text-5xl">
               Upcoming Programs
-            </h1>
+            </h3>
           </div>
         </section>
 
