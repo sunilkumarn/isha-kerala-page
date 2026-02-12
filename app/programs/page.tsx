@@ -45,7 +45,7 @@ export default async function ProgramsPage() {
         <section className="bg-[#1F2A63] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/sadhguru.jpg')" }}>
           <div className="mx-auto max-w-6xl px-6 py-16 text-center">
             <h3 className="mx-auto mt-6 max-w-2xl text-lg text-white/80 ">
-              Welcome to Isha kerala.
+              Welcome to Isha kerala
             </h3>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
             <br></br>
