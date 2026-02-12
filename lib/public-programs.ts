@@ -7,6 +7,8 @@ type Program = {
   slug: string;
   image_url?: string | null;
   sub_text?: string | null;
+  details_external?: boolean | null;
+  external_link?: string | null;
 };
 
 function getTodayLocalISODate() {
@@ -35,6 +37,15 @@ export async function getPublicProgramsFromPublishedSessions(
 ): Promise<{ programs: Program[]; hasMore: boolean }> {
   const today = getTodayLocalISODate();
 
+  const { data: externalProgramRows, error: externalProgramsError } = await supabase
+    .from("programs")
+    .select("id, name, parent_id, slug, image_url, sub_text, details_external, external_link")
+    .eq("details_external", true);
+
+  if (externalProgramsError) {
+    throw new Error(externalProgramsError.message);
+  }
+
   const { data: sessionRows, error: sessionsError } = await supabase
     .from("sessions")
     .select("program_id")
@@ -50,54 +61,74 @@ export async function getPublicProgramsFromPublishedSessions(
     new Set((sessionRows ?? []).map((row: any) => row.program_id).filter(Boolean))
   ) as Array<string | number>;
 
-  if (programIds.length === 0) return { programs: [], hasMore: false };
+  const externalPrograms = (externalProgramRows ?? []) as Program[];
 
-  const { data: programRows, error: programsError } = await supabase
-    .from("programs")
-    .select("id, name, parent_id, slug, image_url, sub_text")
-    .in("id", programIds);
+  const programsFromSessions = await (async () => {
+    if (programIds.length === 0) return [] as Program[];
 
-  if (programsError) {
-    throw new Error(programsError.message);
-  }
-
-  const programs = (programRows ?? []) as Program[];
-
-  const parentIds = Array.from(
-    new Set(programs.map((p) => p.parent_id).filter(Boolean))
-  ) as Array<string | number>;
-
-  const parentMap = new Map<string, Program>();
-
-  if (parentIds.length > 0) {
-    const { data: parentRows, error: parentsError } = await supabase
+    const { data: programRows, error: programsError } = await supabase
       .from("programs")
-      .select("id, name, parent_id, slug, image_url, sub_text")
-      .in("id", parentIds);
+      .select(
+        "id, name, parent_id, slug, image_url, sub_text, details_external, external_link"
+      )
+      .in("id", programIds);
 
-    if (parentsError) {
-      throw new Error(parentsError.message);
+    if (programsError) {
+      throw new Error(programsError.message);
     }
 
-    for (const parent of (parentRows ?? []) as Program[]) {
-      parentMap.set(toKey(parent.id), parent);
+    const programs = (programRows ?? []) as Program[];
+
+    const parentIds = Array.from(
+      new Set(programs.map((p) => p.parent_id).filter(Boolean))
+    ) as Array<string | number>;
+
+    const parentMap = new Map<string, Program>();
+
+    if (parentIds.length > 0) {
+      const { data: parentRows, error: parentsError } = await supabase
+        .from("programs")
+        .select(
+          "id, name, parent_id, slug, image_url, sub_text, details_external, external_link"
+        )
+        .in("id", parentIds);
+
+      if (parentsError) {
+        throw new Error(parentsError.message);
+      }
+
+      for (const parent of (parentRows ?? []) as Program[]) {
+        parentMap.set(toKey(parent.id), parent);
+      }
     }
+
+    // Roll up each session program to its parent program when available.
+    const rolledUp = new Map<string, Program>();
+
+    for (const program of programs) {
+      const parent =
+        program.parent_id != null
+          ? parentMap.get(toKey(program.parent_id)) ?? null
+          : null;
+
+      const displayProgram = parent ?? program;
+      rolledUp.set(toKey(displayProgram.id), displayProgram);
+    }
+
+    return Array.from(rolledUp.values());
+  })();
+
+  const combined = new Map<string, Program>();
+
+  for (const program of programsFromSessions) {
+    combined.set(toKey(program.id), program);
   }
 
-  // Roll up each session program to its parent program when available.
-  const rolledUp = new Map<string, Program>();
-
-  for (const program of programs) {
-    const parent =
-      program.parent_id != null
-        ? parentMap.get(toKey(program.parent_id)) ?? null
-        : null;
-
-    const displayProgram = parent ?? program;
-    rolledUp.set(toKey(displayProgram.id), displayProgram);
+  for (const program of externalPrograms) {
+    combined.set(toKey(program.id), program);
   }
 
-  const sorted = Array.from(rolledUp.values()).sort((a, b) =>
+  const sorted = Array.from(combined.values()).sort((a, b) =>
     a.name.localeCompare(b.name)
   );
 

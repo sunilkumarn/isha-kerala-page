@@ -11,6 +11,8 @@ type Program = {
   parent_id?: string | number | null;
   image_url?: string | null;
   colour?: string | null;
+  details_external?: boolean | null;
+  external_link?: string | null;
 };
 
 type ProgramModalProps = {
@@ -25,6 +27,8 @@ type ProgramModalProps = {
     subText: string;
     parentId: string | number | null;
     file: File | null;
+    detailsExternal: boolean;
+    externalLink: string;
   }) => void;
 };
 
@@ -41,6 +45,8 @@ export default function ProgramModal({
   const [subText, setSubText] = useState("");
   const [parentId, setParentId] = useState<string | number | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [detailsExternal, setDetailsExternal] = useState(false);
+  const [externalLink, setExternalLink] = useState("");
 
   const sortedPrograms = useMemo(() => {
     const sorted = [...programs].sort((a, b) => a.name.localeCompare(b.name));
@@ -54,11 +60,26 @@ export default function ProgramModal({
       setSubText(initialProgram?.sub_text ?? "");
       setParentId(initialProgram?.parent_id ?? null);
       setFile(null);
+      setDetailsExternal(Boolean(initialProgram?.details_external));
+      setExternalLink(initialProgram?.external_link ?? "");
     }
   }, [open, initialProgram]);
 
+  useEffect(() => {
+    if (!detailsExternal) {
+      setExternalLink("");
+    }
+  }, [detailsExternal]);
+
   const handleSave = () => {
-    onSave({ name: name.trim(), subText: subText.trim(), parentId, file });
+    onSave({
+      name: name.trim(),
+      subText: subText.trim(),
+      parentId,
+      file,
+      detailsExternal,
+      externalLink: externalLink.trim(),
+    });
   };
 
   return (
@@ -126,6 +147,31 @@ export default function ProgramModal({
             className="block w-full text-sm text-[#8C7A5B] file:mr-4 file:rounded-md file:border-0 file:bg-[#EAE6DC] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#2B2B2B] hover:file:bg-[#E2DED3]"
           />
         </div>
+
+        <label className="flex items-center justify-between rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B]">
+          External Details Page
+          <input
+            type="checkbox"
+            checked={detailsExternal}
+            onChange={(event) => setDetailsExternal(event.target.checked)}
+            className="h-4 w-4 rounded border-[#E2DED3] text-[#6B5E4A] focus:ring-[#8C7A5B]"
+          />
+        </label>
+
+        {detailsExternal ? (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#2B2B2B]">
+              External Link
+            </label>
+            <input
+              type="url"
+              value={externalLink}
+              onChange={(event) => setExternalLink(event.target.value)}
+              placeholder="https://..."
+              className="w-full rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B] outline-none focus:border-[#8C7A5B]"
+            />
+          </div>
+        ) : null}
 
         {errorMessage ? (
           <p className="text-sm text-[#8C7A5B]">{errorMessage}</p>

@@ -20,6 +20,8 @@ type Program = {
   parent_id: string | number | null;
   image_url?: string | null;
   colour?: string | null;
+  details_external?: boolean | null;
+  external_link?: string | null;
 };
 
 const PAGE_SIZE = 20;
@@ -107,9 +109,16 @@ function ProgramsPageInner() {
     subText: string;
     parentId: string | number | null;
     file: File | null;
+    detailsExternal: boolean;
+    externalLink: string;
   }) => {
     if (!payload.name) {
       setErrorMessage("Please enter a program name.");
+      return;
+    }
+
+    if (payload.detailsExternal && !payload.externalLink) {
+      setErrorMessage("Please enter an external link.");
       return;
     }
 
@@ -144,11 +153,15 @@ function ProgramsPageInner() {
       sub_text: string | null;
       image_url?: string | null;
       colour?: string | null;
+      details_external: boolean;
+      external_link: string | null;
     } = {
       name: payload.name,
       parent_id: payload.parentId,
       slug: slugify(payload.name),
       sub_text: payload.subText ? payload.subText : null,
+      details_external: payload.detailsExternal,
+      external_link: payload.detailsExternal ? payload.externalLink : null,
     };
 
     if (imageUrl) {

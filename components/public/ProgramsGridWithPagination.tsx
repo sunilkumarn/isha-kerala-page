@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
+import ProgramCard from "@/components/public/ProgramCard";
 
 type Program = {
   id: string | number;
@@ -10,6 +10,8 @@ type Program = {
   slug: string;
   image_url?: string | null;
   sub_text?: string | null;
+  details_external?: boolean | null;
+  external_link?: string | null;
 };
 
 type ProgramsApiResponse =
@@ -67,47 +69,7 @@ export default function ProgramsGridWithPagination({
     <div>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {programs.map((program) => (
-          <article
-            key={String(program.id)}
-            className="overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <div className="relative aspect-[4/3] w-full bg-slate-100">
-              {program.image_url ? (
-                // Use <img> to avoid Next image remotePatterns configuration.
-                <img
-                  src={program.image_url}
-                  alt={program.name}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-xs font-medium text-slate-500">
-                    No image
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-6 text-center">
-              <h3 className="text-xl text-slate-900">{program.name}</h3>
-              {program.sub_text ? (
-                <p className="mt-0 text-sm text-slate-600 line-clamp-2">
-                  {program.sub_text}
-                </p>
-              ) : null}
-
-              <div className="mt-5">
-                <Link
-                  href={`/programs/${encodeURIComponent(program.slug)}`}
-                  className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-6 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/50 focus:ring-offset-2"
-                >
-                  Know More
-                </Link>
-              </div>
-            </div>
-          </article>
+          <ProgramCard key={String(program.id)} program={program} />
         ))}
       </div>
 

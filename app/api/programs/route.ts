@@ -10,6 +10,8 @@ type Program = {
   slug: string;
   image_url?: string | null;
   sub_text?: string | null;
+  details_external?: boolean | null;
+  external_link?: string | null;
 };
 
 function parsePositiveInt(value: string | null, fallback: number) {

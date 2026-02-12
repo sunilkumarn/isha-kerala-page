@@ -5,6 +5,8 @@ type Program = {
   parent_id: string | number | null;
   image_url?: string | null;
   colour?: string | null;
+  details_external?: boolean | null;
+  external_link?: string | null;
 };
 
 export type ProgramRowItem = {
@@ -115,6 +117,11 @@ function ProgramRow({
             <p className="text-sm font-medium text-[#2B2B2B]">
               {program.name}
             </p>
+            {program.details_external ? (
+              <span className="rounded-full border border-[#E2DED3] bg-white px-2 py-0.5 text-[11px] font-medium text-[#6B5E4A]">
+                External
+              </span>
+            ) : null}
           </div>
           {program.sub_text ? (
             <p className="mt-1 text-xs text-slate-500">{program.sub_text}</p>
