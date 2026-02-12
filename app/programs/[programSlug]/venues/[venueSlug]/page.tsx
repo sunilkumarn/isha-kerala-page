@@ -436,11 +436,6 @@ export default async function ProgramVenueSessionsPage({
 
                       {registrationsAllowed || openWithoutRegistration ? (
                         <div className="mt-3 flex flex-wrap gap-2">
-                          {registrationsAllowed ? (
-                            <span className="inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-800">
-                              Register Required
-                            </span>
-                          ) : null}
                           {openWithoutRegistration ? (
                             <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
                               Open to all
