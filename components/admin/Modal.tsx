@@ -14,7 +14,7 @@ export default function Modal({ open, title, children, onClose }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2B2B2B]/30 px-4">
-      <div className="w-full max-w-md rounded-lg border border-[#E2DED3] bg-white p-6">
+      <div className="flex max-h-[85vh] w-full max-w-md flex-col rounded-lg border border-[#E2DED3] bg-white p-6">
         <div className="flex items-start justify-between">
           <h2 className="text-lg font-medium text-[#2B2B2B]">{title}</h2>
           <button
@@ -26,7 +26,7 @@ export default function Modal({ open, title, children, onClose }: ModalProps) {
             ×
           </button>
         </div>
-        <div className="mt-6">{children}</div>
+        <div className="-mr-1 mt-6 overflow-y-auto pr-1">{children}</div>
       </div>
     </div>
   );

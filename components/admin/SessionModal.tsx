@@ -46,6 +46,9 @@ type SessionModalProps = {
     end_time: string | null;
     language: string | null;
     is_published: boolean | null;
+    registrations_allowed?: boolean | null;
+    registration_link?: string | null;
+    open_without_registration?: boolean | null;
   } | null;
   onClose: () => void;
   onSave: (payload: {
@@ -59,6 +62,9 @@ type SessionModalProps = {
     endTime: string;
     language: string;
     isPublished: boolean;
+    registrationsAllowed: boolean;
+    registrationLink: string;
+    openWithoutRegistration: boolean;
   }) => void;
 };
 
@@ -85,6 +91,9 @@ export default function SessionModal({
   const [endTime, setEndTime] = useState("");
   const [language, setLanguage] = useState("English");
   const [isPublished, setIsPublished] = useState(false);
+  const [registrationsAllowed, setRegistrationsAllowed] = useState(false);
+  const [registrationLink, setRegistrationLink] = useState("");
+  const [openWithoutRegistration, setOpenWithoutRegistration] = useState(false);
   const [programSearch, setProgramSearch] = useState("");
 
   const leafPrograms = useMemo(() => {
@@ -133,9 +142,18 @@ export default function SessionModal({
       setEndTime(initialSession?.end_time ?? "");
       setLanguage(initialSession?.language ?? "English");
       setIsPublished(Boolean(initialSession?.is_published));
+      setRegistrationsAllowed(Boolean(initialSession?.registrations_allowed));
+      setRegistrationLink(initialSession?.registration_link ?? "");
+      setOpenWithoutRegistration(Boolean(initialSession?.open_without_registration));
       setProgramSearch("");
     }
   }, [open, initialSession, venues]);
+
+  useEffect(() => {
+    if (!registrationsAllowed) {
+      setRegistrationLink("");
+    }
+  }, [registrationsAllowed]);
 
   const handleSave = () => {
     onSave({
@@ -149,6 +167,9 @@ export default function SessionModal({
       endTime,
       language,
       isPublished,
+      registrationsAllowed,
+      registrationLink,
+      openWithoutRegistration,
     });
   };
 
@@ -335,6 +356,41 @@ export default function SessionModal({
             <option value="Malayalam">Malayalam</option>
           </select>
         </div>
+
+        <label className="flex items-center justify-between rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B]">
+          Registrations Open?
+          <input
+            type="checkbox"
+            checked={registrationsAllowed}
+            onChange={(event) => setRegistrationsAllowed(event.target.checked)}
+            className="h-4 w-4 rounded border-[#E2DED3] text-[#6B5E4A] focus:ring-[#8C7A5B]"
+          />
+        </label>
+
+        {registrationsAllowed ? (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#2B2B2B]">
+              Registration Link
+            </label>
+            <input
+              type="url"
+              value={registrationLink}
+              onChange={(event) => setRegistrationLink(event.target.value)}
+              placeholder="https://..."
+              className="w-full rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B] outline-none focus:border-[#8C7A5B]"
+            />
+          </div>
+        ) : null}
+
+        <label className="flex items-center justify-between rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B]">
+          Open without Registration (Walk-in allowed)
+          <input
+            type="checkbox"
+            checked={openWithoutRegistration}
+            onChange={(event) => setOpenWithoutRegistration(event.target.checked)}
+            className="h-4 w-4 rounded border-[#E2DED3] text-[#6B5E4A] focus:ring-[#8C7A5B]"
+          />
+        </label>
 
         <label className="flex items-center justify-between rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B]">
           Publish this session

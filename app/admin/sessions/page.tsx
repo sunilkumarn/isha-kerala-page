@@ -44,6 +44,9 @@ type Session = {
   end_time: string | null;
   language: string | null;
   is_published: boolean | null;
+  registrations_allowed?: boolean | null;
+  registration_link?: string | null;
+  open_without_registration?: boolean | null;
   programs?: { name: string; colour?: string | null } | null;
   venues?: Venue | null;
   contacts?: { name: string } | null;
@@ -241,6 +244,9 @@ function SessionsPageInner() {
     endTime: string;
     language: string;
     isPublished: boolean;
+    registrationsAllowed: boolean;
+    registrationLink: string;
+    openWithoutRegistration: boolean;
   }) => {
     if (!payload.programId || !payload.venueId || !payload.contactId) {
       setErrorMessage("Please select a program, venue, and contact.");
@@ -264,6 +270,11 @@ function SessionsPageInner() {
       end_time: payload.endTime || null,
       language: payload.language,
       is_published: payload.isPublished,
+      registrations_allowed: payload.registrationsAllowed,
+      registration_link: payload.registrationsAllowed
+        ? payload.registrationLink.trim() || null
+        : null,
+      open_without_registration: payload.openWithoutRegistration,
     };
 
     const { error } = editingSession

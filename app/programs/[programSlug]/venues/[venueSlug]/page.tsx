@@ -117,6 +117,9 @@ type Session = {
   end_time: string | null;
   language: string | null;
   is_published: boolean | null;
+  registrations_allowed?: boolean | null;
+  registration_link?: string | null;
+  open_without_registration?: boolean | null;
   programs?: {
     name: string;
     image_url?: string | null;
@@ -359,7 +362,7 @@ export default async function ProgramVenueSessionsPage({
             </h1>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
             <p className="mx-auto mt-4 max-w-2xl text-sm text-white/80 md:text-base">
-              Upcoming sessions available for registration
+              Upcoming sessions
             </p>
           </div>
         </header>
@@ -381,8 +384,12 @@ export default async function ProgramVenueSessionsPage({
                 const accent = session.programs?.colour
                   ? hexToRgba(session.programs.colour, 0.08)
                   : null;
-                const telHref = toTelHref(session.contacts?.phone);
                 const mapsHref = toSafeHttpUrl(session.venues?.google_maps_url);
+                const registrationsAllowed = Boolean(session.registrations_allowed);
+                const openWithoutRegistration = Boolean(
+                  session.open_without_registration
+                );
+                const registrationHref = toSafeHttpUrl(session.registration_link);
 
                 return (
                   <article
@@ -413,6 +420,25 @@ export default async function ProgramVenueSessionsPage({
                       <h3 className="text-xl text-slate-900">
                         {session.programs?.name ?? "Program"}
                       </h3>
+
+                      {registrationsAllowed || openWithoutRegistration ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {registrationsAllowed ? (
+                            <span className="inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-800">
+                              Register Required
+                            </span>
+                          ) : null}
+                          {openWithoutRegistration ? (
+                            <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                              Open to all
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <p className="mt-3 text-xs font-medium text-slate-600">
+                          Contact for details
+                        </p>
+                      )}
 
                       <dl className="mt-4 space-y-2 text-sm text-slate-600">
                         <div className="flex items-start gap-3">
@@ -479,19 +505,24 @@ export default async function ProgramVenueSessionsPage({
                         </div>
                       </dl>
 
-                      <div className="mt-6">
-                        <a
-                          href={telHref ?? undefined}
-                          aria-disabled={!telHref}
-                          className={`inline-flex w-full items-center justify-center rounded-full px-6 py-2 text-sm font-semibold text-white shadow-sm transition ${
-                            telHref
-                              ? "bg-[#F28C18] hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/50 focus:ring-offset-2"
-                              : "cursor-not-allowed bg-slate-300"
-                          }`}
-                        >
-                          Register Now
-                        </a>
-                      </div>
+                      {registrationsAllowed ? (
+                        <div className="mt-6">
+                          <a
+                            href={registrationHref ?? undefined}
+                            aria-disabled={!registrationHref}
+                            className={`inline-flex w-full items-center justify-center rounded-full px-6 py-2 text-sm font-semibold text-white shadow-sm transition ${
+                              registrationHref
+                                ? "bg-[#F28C18] hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/50 focus:ring-offset-2"
+                                : "cursor-not-allowed bg-slate-300"
+                            }`}
+                            target={registrationHref ? "_blank" : undefined}
+                            rel={registrationHref ? "noopener noreferrer" : undefined}
+                          >
+                            Register/Enquire Now
+                          </a>
+                        </div>
+                      ) : null}
+                      
                     </div>
                   </article>
                 );
