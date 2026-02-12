@@ -469,7 +469,7 @@ export default async function ProgramVenueSessionsPage({
                                     className="inline-flex items-center rounded-full border border-slate-200 bg-white/70 px-2 py-0.5 text-xs font-semibold text-slate-700 hover:bg-white hover:text-slate-900"
                                     aria-label={`Open ${session.venues?.name ?? "venue"} on Google Maps`}
                                   >
-                                    Open in maps
+                                    Google maps location
                                      <svg
                                       viewBox="0 0 24 24"
                                       aria-hidden="true"
