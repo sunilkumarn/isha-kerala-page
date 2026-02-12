@@ -223,17 +223,17 @@ export default async function ProgramVenuesPage({
                   className="overflow-hidden rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm"
                 >
                   <div className="-mx-8 -mt-8 mb-6">
-                    <div className="flex flex-col items-center justify-center gap-4 bg-slate-50 py-10">
-                      <div className="text-3xl font-semibold text-slate-600">
-                        {city.cityName.toUpperCase()}
-                      </div>
-                      <div className="h-20 w-28 overflow-hidden rounded-lg border border-black/5 bg-white shadow-sm">
-                        <img
-                          src={"/city-image.jpeg"}
-                          alt={`${city.cityName} thumbnail`}
-                          className="h-full w-full object-cover"
-                          loading="lazy"
-                        />
+                    <div
+                      className="relative aspect-[4/3] w-full bg-slate-100 bg-cover bg-center bg-no-repeat"
+                      style={{
+                        backgroundImage: `url("/city-image.jpeg")`,
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-white/85" aria-hidden="true" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-3xl font-semibold text-slate-700">
+                          {city.cityName.toUpperCase()}
+                        </div>
                       </div>
                     </div>
                   </div>
