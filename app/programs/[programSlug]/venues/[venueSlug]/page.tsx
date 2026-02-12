@@ -93,6 +93,7 @@ type Venue = {
   id: string | number;
   name: string;
   slug: string;
+  cities?: { name: string } | null;
 };
 
 type Contact = {
@@ -214,7 +215,7 @@ export default async function ProgramVenueSessionsPage({
       .limit(1),
     supabase
       .from("venues")
-      .select("id, name, slug")
+      .select("id, name, slug, cities(name)")
       .eq("slug", venueSlug)
       .order("id", { ascending: true })
       .limit(1),
@@ -229,7 +230,7 @@ export default async function ProgramVenueSessionsPage({
     venueByIdFirst
       ? supabase
           .from("venues")
-          .select("id, name, slug")
+          .select("id, name, slug, cities(name)")
           .eq("id", venueSlug)
           .order("id", { ascending: true })
           .limit(1)
@@ -309,7 +310,8 @@ export default async function ProgramVenueSessionsPage({
     }
   }
 
-  const title = `${(program as Program).name} in ${(venue as Venue).name}`;
+  const venueCityName = (venue as Venue).cities?.name ?? (venue as Venue).name;
+  const title = `${(program as Program).name} in ${venueCityName}`;
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F7F4EE]">

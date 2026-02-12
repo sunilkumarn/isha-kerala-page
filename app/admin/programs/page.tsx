@@ -5,6 +5,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { slugify } from "@/lib/slugify";
 import { generatePastelColor } from "@/lib/colors";
+import { getSupabaseErrorMessage } from "@/lib/supabase-error";
+import { adminDeleteById } from "@/lib/admin-delete";
 import Button from "@/components/admin/Button";
 import ProgramList, { buildProgramRows } from "@/components/admin/ProgramList";
 import Pagination from "@/components/admin/Pagination";
@@ -36,6 +38,10 @@ function ProgramsPageInner() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Program | null>(null);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const totalCount = useMemo(() => buildProgramRows(programs).length, [programs]);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -160,7 +166,11 @@ function ProgramsPageInner() {
         });
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(
+        getSupabaseErrorMessage(error, {
+          uniqueViolationMessage: editingProgram ? undefined : "Program already exists",
+        })
+      );
       setIsSaving(false);
       return;
     }
@@ -178,29 +188,32 @@ function ProgramsPageInner() {
 
   const handleRequestDelete = (program: Program) => {
     setPendingDelete(program);
+    setDeleteErrorMessage(null);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!pendingDelete) return;
-    const { error } = await supabase
-      .from("programs")
-      .delete()
-      .eq("id", pendingDelete.id);
-
-    if (error) {
-      setErrorMessage(error.message);
-      return;
+    setIsDeleting(true);
+    setDeleteErrorMessage(null);
+    try {
+      await adminDeleteById("programs", pendingDelete.id);
+      setConfirmOpen(false);
+      setPendingDelete(null);
+      await fetchPrograms();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setDeleteErrorMessage(message);
+    } finally {
+      setIsDeleting(false);
     }
-
-    setConfirmOpen(false);
-    setPendingDelete(null);
-    await fetchPrograms();
   };
 
   const handleCancelDelete = () => {
     setConfirmOpen(false);
     setPendingDelete(null);
+    setDeleteErrorMessage(null);
+    setIsDeleting(false);
   };
 
   return (
@@ -276,6 +289,8 @@ function ProgramsPageInner() {
             : "Delete this program? This action cannot be undone."
         }
         confirmLabel="Delete"
+        isConfirming={isDeleting}
+        errorMessage={deleteErrorMessage}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />

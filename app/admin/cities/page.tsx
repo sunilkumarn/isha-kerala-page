@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { adminDeleteById } from "@/lib/admin-delete";
 import Button from "@/components/admin/Button";
 import Pagination from "@/components/admin/Pagination";
 import Modal from "@/components/admin/Modal";
@@ -31,6 +32,10 @@ function CitiesPageInner() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<City | null>(null);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -96,7 +101,11 @@ function CitiesPageInner() {
       : await supabase.from("cities").insert({ name: trimmedName });
 
     if (error) {
-      setErrorMessage(error.message);
+      if (!editingCity && error.code === "23505") {
+        setErrorMessage("City already exists");
+      } else {
+        setErrorMessage(error.message);
+      }
       setIsSaving(false);
       return;
     }
@@ -123,29 +132,32 @@ function CitiesPageInner() {
 
   const handleRequestDelete = (city: City) => {
     setPendingDelete(city);
+    setDeleteErrorMessage(null);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!pendingDelete) return;
-    const { error } = await supabase
-      .from("cities")
-      .delete()
-      .eq("id", pendingDelete.id);
-
-    if (error) {
-      setErrorMessage(error.message);
-      return;
+    setIsDeleting(true);
+    setDeleteErrorMessage(null);
+    try {
+      await adminDeleteById("cities", pendingDelete.id);
+      setConfirmOpen(false);
+      setPendingDelete(null);
+      await fetchCities();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setDeleteErrorMessage(message);
+    } finally {
+      setIsDeleting(false);
     }
-
-    setConfirmOpen(false);
-    setPendingDelete(null);
-    await fetchCities();
   };
 
   const handleCancelDelete = () => {
     setConfirmOpen(false);
     setPendingDelete(null);
+    setDeleteErrorMessage(null);
+    setIsDeleting(false);
   };
 
   return (
@@ -244,7 +256,7 @@ function CitiesPageInner() {
           </div>
 
           {errorMessage ? (
-            <p className="text-sm text-[#8C7A5B]">{errorMessage}</p>
+            <p className="text-xs text-red-600">{errorMessage}</p>
           ) : null}
 
           <div className="flex justify-end gap-3">
@@ -271,6 +283,8 @@ function CitiesPageInner() {
             : "Delete this city? This action cannot be undone."
         }
         confirmLabel="Delete"
+        isConfirming={isDeleting}
+        errorMessage={deleteErrorMessage}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />

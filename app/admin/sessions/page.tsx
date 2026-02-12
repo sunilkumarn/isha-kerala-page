@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { adminDeleteById } from "@/lib/admin-delete";
 import Button from "@/components/admin/Button";
 import Pagination from "@/components/admin/Pagination";
 import SessionModal from "@/components/admin/SessionModal";
@@ -104,6 +105,10 @@ function SessionsPageInner() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Session | null>(null);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -287,29 +292,32 @@ function SessionsPageInner() {
 
   const handleRequestDelete = (session: Session) => {
     setPendingDelete(session);
+    setDeleteErrorMessage(null);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!pendingDelete) return;
-    const { error } = await supabase
-      .from("sessions")
-      .delete()
-      .eq("id", pendingDelete.id);
-
-    if (error) {
-      setErrorMessage(error.message);
-      return;
+    setIsDeleting(true);
+    setDeleteErrorMessage(null);
+    try {
+      await adminDeleteById("sessions", pendingDelete.id);
+      setConfirmOpen(false);
+      setPendingDelete(null);
+      await fetchSessions();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setDeleteErrorMessage(message);
+    } finally {
+      setIsDeleting(false);
     }
-
-    setConfirmOpen(false);
-    setPendingDelete(null);
-    await fetchSessions();
   };
 
   const handleCancelDelete = () => {
     setConfirmOpen(false);
     setPendingDelete(null);
+    setDeleteErrorMessage(null);
+    setIsDeleting(false);
   };
 
   return (
@@ -543,6 +551,8 @@ function SessionsPageInner() {
         title="Delete Session"
         message="Delete this session? This action cannot be undone."
         confirmLabel="Delete"
+        isConfirming={isDeleting}
+        errorMessage={deleteErrorMessage}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />

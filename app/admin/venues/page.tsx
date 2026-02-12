@@ -4,6 +4,8 @@ import { Suspense, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { slugify } from "@/lib/slugify";
+import { getSupabaseErrorMessage } from "@/lib/supabase-error";
+import { adminDeleteById } from "@/lib/admin-delete";
 import Button from "@/components/admin/Button";
 import Pagination from "@/components/admin/Pagination";
 import VenueModal from "@/components/admin/VenueModal";
@@ -41,6 +43,10 @@ function VenuesPageInner() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Venue | null>(null);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -127,9 +133,42 @@ function VenuesPageInner() {
 
     setIsSaving(true);
 
-    const venuePayload = {
+    const cityName =
+      cities.find((city) => String(city.id) === String(payload.cityId))?.name ??
+      null;
+
+    const ensureUniqueVenueSlug = async (baseSlug: string) => {
+      const safeBase = baseSlug.trim() || slugify(payload.name) || "venue";
+      let candidate = safeBase;
+
+      for (let suffix = 2; suffix <= 50; suffix += 1) {
+        const { data, error } = await supabase
+          .from("venues")
+          .select("id")
+          .eq("slug", candidate)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!data) return candidate;
+
+        candidate = `${safeBase}-${suffix}`;
+      }
+
+      return `${safeBase}-${Date.now()}`;
+    };
+
+    const insertPayload = {
       name: payload.name,
-      slug: slugify(payload.name),
+      // Requirement: venue slug should be the city name (not venue name) at creation time.
+      slug: await ensureUniqueVenueSlug(slugify(cityName ?? payload.name)),
+      city_id: payload.cityId,
+      address: payload.address || null,
+      google_maps_url: payload.googleMapsUrl || null,
+    };
+
+    const updatePayload = {
+      name: payload.name,
+      // IMPORTANT: Do not regenerate venue slug on edit.
       city_id: payload.cityId,
       address: payload.address || null,
       google_maps_url: payload.googleMapsUrl || null,
@@ -138,12 +177,18 @@ function VenuesPageInner() {
     const { error } = editingVenue
       ? await supabase
           .from("venues")
-          .update(venuePayload)
+          .update(updatePayload)
           .eq("id", editingVenue.id)
-      : await supabase.from("venues").insert(venuePayload);
+      : await supabase.from("venues").insert(insertPayload);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(
+        getSupabaseErrorMessage(error, {
+          uniqueViolationMessage: editingVenue
+            ? undefined
+            : "Venue already exists in this city",
+        })
+      );
       setIsSaving(false);
       return;
     }
@@ -161,29 +206,32 @@ function VenuesPageInner() {
 
   const handleRequestDelete = (venue: Venue) => {
     setPendingDelete(venue);
+    setDeleteErrorMessage(null);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!pendingDelete) return;
-    const { error } = await supabase
-      .from("venues")
-      .delete()
-      .eq("id", pendingDelete.id);
-
-    if (error) {
-      setErrorMessage(error.message);
-      return;
+    setIsDeleting(true);
+    setDeleteErrorMessage(null);
+    try {
+      await adminDeleteById("venues", pendingDelete.id);
+      setConfirmOpen(false);
+      setPendingDelete(null);
+      await fetchVenues();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setDeleteErrorMessage(message);
+    } finally {
+      setIsDeleting(false);
     }
-
-    setConfirmOpen(false);
-    setPendingDelete(null);
-    await fetchVenues();
   };
 
   const handleCancelDelete = () => {
     setConfirmOpen(false);
     setPendingDelete(null);
+    setDeleteErrorMessage(null);
+    setIsDeleting(false);
   };
 
   return (
@@ -323,6 +371,8 @@ function VenuesPageInner() {
             : "Delete this venue? This action cannot be undone."
         }
         confirmLabel="Delete"
+        isConfirming={isDeleting}
+        errorMessage={deleteErrorMessage}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />

@@ -9,6 +9,8 @@ type ConfirmDialogProps = {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  isConfirming?: boolean;
+  errorMessage?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -19,6 +21,8 @@ export default function ConfirmDialog({
   message,
   confirmLabel = "Delete",
   cancelLabel = "Cancel",
+  isConfirming = false,
+  errorMessage = null,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -26,12 +30,20 @@ export default function ConfirmDialog({
     <Modal open={open} title={title} onClose={onCancel}>
       <div className="space-y-5">
         <p className="text-sm text-[#8C7A5B]">{message}</p>
+        {errorMessage ? (
+          <p className="text-xs text-red-600">{errorMessage}</p>
+        ) : null}
         <div className="flex justify-end gap-3">
-          <Button type="button" variant="secondary" onClick={onCancel}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onCancel}
+            disabled={isConfirming}
+          >
             {cancelLabel}
           </Button>
-          <Button type="button" onClick={onConfirm}>
-            {confirmLabel}
+          <Button type="button" onClick={onConfirm} disabled={isConfirming}>
+            {isConfirming ? "Deleting..." : confirmLabel}
           </Button>
         </div>
       </div>

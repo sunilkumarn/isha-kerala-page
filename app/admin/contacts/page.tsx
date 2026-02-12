@@ -3,6 +3,8 @@
 import { Suspense, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { getSupabaseErrorMessage } from "@/lib/supabase-error";
+import { adminDeleteById } from "@/lib/admin-delete";
 import Button from "@/components/admin/Button";
 import Pagination from "@/components/admin/Pagination";
 import ContactModal from "@/components/admin/ContactModal";
@@ -41,6 +43,10 @@ function ContactsPageInner() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Contact | null>(null);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -144,7 +150,11 @@ function ContactsPageInner() {
       : await supabase.from("contacts").insert(contactPayload);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(
+        getSupabaseErrorMessage(error, {
+          uniqueViolationMessage: editingContact ? undefined : "Contact already exists",
+        })
+      );
       setIsSaving(false);
       return;
     }
@@ -162,29 +172,32 @@ function ContactsPageInner() {
 
   const handleRequestDelete = (contact: Contact) => {
     setPendingDelete(contact);
+    setDeleteErrorMessage(null);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!pendingDelete) return;
-    const { error } = await supabase
-      .from("contacts")
-      .delete()
-      .eq("id", pendingDelete.id);
-
-    if (error) {
-      setErrorMessage(error.message);
-      return;
+    setIsDeleting(true);
+    setDeleteErrorMessage(null);
+    try {
+      await adminDeleteById("contacts", pendingDelete.id);
+      setConfirmOpen(false);
+      setPendingDelete(null);
+      await fetchContacts();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setDeleteErrorMessage(message);
+    } finally {
+      setIsDeleting(false);
     }
-
-    setConfirmOpen(false);
-    setPendingDelete(null);
-    await fetchContacts();
   };
 
   const handleCancelDelete = () => {
     setConfirmOpen(false);
     setPendingDelete(null);
+    setDeleteErrorMessage(null);
+    setIsDeleting(false);
   };
 
   return (
@@ -306,6 +319,8 @@ function ContactsPageInner() {
             : "Delete this contact? This action cannot be undone."
         }
         confirmLabel="Delete"
+        isConfirming={isDeleting}
+        errorMessage={deleteErrorMessage}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
