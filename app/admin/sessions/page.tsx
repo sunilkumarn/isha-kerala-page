@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { adminDeleteById } from "@/lib/admin-delete";
@@ -66,6 +67,14 @@ const formatTime = (value?: string | null) => {
   return parsed.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 };
 
+function getTodayLocalISODate() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 const formatSessionDates = (session: Session) => {
   const startDate = formatDate(session.start_date);
   const endDate = formatDate(session.end_date);
@@ -93,6 +102,7 @@ function SessionsPageInner() {
   const searchParams = useSearchParams();
   const pageParam = searchParams.get("page");
   const page = Math.max(1, Math.floor(Number(pageParam ?? "1") || 1));
+  const isPastView = searchParams.get("view") === "past";
 
   const [sessions, setSessions] = useState<Session[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -152,8 +162,9 @@ function SessionsPageInner() {
     setIsLoading(true);
     const from = (page - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
+    const today = getTodayLocalISODate();
 
-    const { data, error, count } = await supabase
+    let query = supabase
       .from("sessions")
       .select(
         `
@@ -165,8 +176,24 @@ function SessionsPageInner() {
         ,
         { count: "exact" }
       )
-      .order("start_date", { ascending: true })
       .range(from, to);
+
+    if (isPastView) {
+      query = query
+        .or(
+          `and(end_date.not.is.null,end_date.lt.${today}),and(end_date.is.null,start_date.lt.${today})`
+        )
+        .not("start_date", "is", null)
+        .order("start_date", { ascending: false });
+    } else {
+      query = query
+        .or(
+          `start_date.gte.${today},start_date.is.null,and(end_date.not.is.null,end_date.gte.${today})`
+        )
+        .order("start_date", { ascending: true });
+    }
+
+    const { data, error, count } = await query;
     setTotalCount(count ?? 0);
     const nextTotalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
     if (page > nextTotalPages) {
@@ -225,7 +252,7 @@ function SessionsPageInner() {
 
   useEffect(() => {
     fetchSessions();
-  }, [page]);
+  }, [page, isPastView]);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -335,21 +362,33 @@ function SessionsPageInner() {
     <div className="space-y-8">
       <header className="flex flex-wrap items-start justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-medium text-[#2B2B2B]">Sessions</h1>
+          <h1 className="text-2xl font-medium text-[#2B2B2B]">
+            {isPastView ? "Past Sessions" : "Current & Upcoming Sessions"}
+          </h1>
+
           <p className="mt-1 text-sm text-[#8C7A5B]">
             Plan program sessions with dates, venues, and contacts.
           </p>
         </div>
-        <Button
-          type="button"
-          onClick={() => {
-            setEditingSession(null);
-            setIsModalOpen(true);
-          }}
-          className="px-5 py-3 text-base"
-        >
-          + Create Session
-        </Button>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href={isPastView ? "/admin/sessions" : "/admin/sessions?view=past"}
+            className="text-sm font-medium text-[#8C7A5B] underline-offset-4 hover:text-[#2B2B2B] hover:underline"
+          >
+            {isPastView ? "View current & upcoming sessions" : "View past sessions"}
+          </Link>
+          <Button
+            type="button"
+            onClick={() => {
+              setEditingSession(null);
+              setIsModalOpen(true);
+            }}
+            className="px-5 py-3 text-base"
+          >
+            + Create Session
+          </Button>
+        </div>
+        
       </header>
 
       <section className="rounded-xl border border-[#E2DED3] bg-white">
