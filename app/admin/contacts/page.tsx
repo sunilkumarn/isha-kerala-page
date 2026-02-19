@@ -122,12 +122,12 @@ function ContactsPageInner() {
 
   const handleSaveContact = async (payload: {
     name: string;
-    email: string;
+    email: string | null;
     phone: string;
     whatsapp: string;
     cityId: string | number | null;
   }) => {
-    if (!payload.name || !payload.email || !payload.phone || !payload.cityId) {
+    if (!payload.name || !payload.phone || !payload.cityId) {
       setErrorMessage("Please complete the required contact fields.");
       return;
     }
@@ -136,7 +136,7 @@ function ContactsPageInner() {
 
     const contactPayload = {
       name: payload.name,
-      email: payload.email,
+      email: payload.email || null,
       phone: payload.phone,
       whatsapp: payload.whatsapp || null,
       city_id: payload.cityId,

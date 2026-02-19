@@ -25,7 +25,7 @@ type ContactModalProps = {
   onClose: () => void;
   onSave: (payload: {
     name: string;
-    email: string;
+    email: string | null;
     phone: string;
     whatsapp: string;
     cityId: string | number | null;
@@ -63,9 +63,10 @@ export default function ContactModal({
   }, [open, initialContact]);
 
   const handleSave = () => {
+    const trimmedEmail = email.trim();
     onSave({
       name: name.trim(),
-      email: email.trim(),
+      email: trimmedEmail ? trimmedEmail : null,
       phone: phone.trim(),
       whatsapp: whatsapp.trim(),
       cityId,
@@ -93,7 +94,9 @@ export default function ContactModal({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-[#2B2B2B]">Email</label>
+          <label className="text-sm font-medium text-[#2B2B2B]">
+            Email (Optional)
+          </label>
           <input
             type="email"
             value={email}

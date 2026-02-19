@@ -30,6 +30,7 @@ function VenuesPageInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const pageParam = searchParams.get("page");
+  const queryParam = searchParams.get("q") ?? "";
   const page = Math.max(1, Math.floor(Number(pageParam ?? "1") || 1));
 
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -42,6 +43,7 @@ function VenuesPageInner() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Venue | null>(null);
   const [totalCount, setTotalCount] = useState(0);
+  const [searchText, setSearchText] = useState(queryParam);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
@@ -57,16 +59,62 @@ function VenuesPageInner() {
     router.push(queryString ? `${pathname}?${queryString}` : pathname);
   };
 
+  const setQuery = (nextQuery: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const trimmed = nextQuery.trim();
+    if (!trimmed) {
+      params.delete("q");
+    } else {
+      params.set("q", trimmed);
+    }
+    params.delete("page");
+    const queryString = params.toString();
+    router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  };
+
   const fetchVenues = async () => {
     setIsLoading(true);
     const from = (page - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
 
-    const { data, error, count } = await supabase
+    const query = queryParam.trim();
+    const escapeOrValue = (value: string) =>
+      value
+        .replaceAll("\\", "\\\\")
+        .replaceAll("%", "\\%")
+        .replaceAll("_", "\\_")
+        .replaceAll(",", "\\,")
+        .replaceAll("(", "\\(")
+        .replaceAll(")", "\\)");
+
+    let venuesQuery = supabase
       .from("venues")
       .select("*, cities(name)", { count: "exact" })
-      .order("name")
-      .range(from, to);
+      .order("name");
+
+    if (query) {
+      const escaped = escapeOrValue(query);
+      const orParts = [
+        `name.ilike.%${escaped}%`,
+        `address.ilike.%${escaped}%`,
+      ];
+
+      const { data: matchedCities, error: matchedCitiesError } = await supabase
+        .from("cities")
+        .select("id")
+        .ilike("name", `%${query}%`);
+
+      if (!matchedCitiesError && matchedCities && matchedCities.length > 0) {
+        const inList = matchedCities
+          .map((city) => JSON.stringify(String(city.id)))
+          .join(",");
+        orParts.push(`city_id.in.(${inList})`);
+      }
+
+      venuesQuery = venuesQuery.or(orParts.join(","));
+    }
+
+    const { data, error, count } = await venuesQuery.range(from, to);
 
     if (error) {
       setErrorMessage(error.message);
@@ -102,11 +150,27 @@ function VenuesPageInner() {
 
   useEffect(() => {
     fetchVenues();
-  }, [page]);
+  }, [page, queryParam]);
 
   useEffect(() => {
     fetchCities();
   }, []);
+
+  useEffect(() => {
+    setSearchText(queryParam);
+  }, [queryParam]);
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => {
+      const trimmed = searchText.trim();
+      const trimmedParam = queryParam.trim();
+      if (trimmed !== trimmedParam) {
+        setQuery(searchText);
+      }
+    }, 300);
+
+    return () => window.clearTimeout(handle);
+  }, [searchText, queryParam]);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -217,15 +281,25 @@ function VenuesPageInner() {
       </header>
 
       <section className="rounded-lg border border-[#E2DED3] bg-white">
-        <div className="border-b border-[#E2DED3] px-6 py-4 text-sm font-medium text-[#8C7A5B]">
-          Venue List
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2DED3] px-6 py-4">
+          <div className="text-sm font-medium text-[#8C7A5B]">Venue List</div>
+          <input
+            type="search"
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+            placeholder="Search by name or address"
+            aria-label="Search venues by name or address"
+            className="w-full max-w-md rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B] outline-none focus:border-[#8C7A5B]"
+          />
         </div>
         <div className="px-6 py-5">
           {isLoading ? (
             <p className="text-sm text-[#8C7A5B]">Loading venues...</p>
           ) : venues.length === 0 ? (
             <p className="text-sm text-[#8C7A5B]">
-              No venues yet. Add the first one.
+              {queryParam.trim()
+                ? `No venues found for "${queryParam.trim()}".`
+                : "No venues yet. Add the first one."}
             </p>
           ) : (
             <div className="overflow-x-auto">
