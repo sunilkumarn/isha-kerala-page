@@ -13,13 +13,13 @@ export default function PublicHeader() {
           className="inline-flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/40 focus:ring-offset-2"
           aria-label="Isha Kerala home"
         >
-          <Image
+          {/* <Image
             src="/isha-logo.svg"
             alt="Isha Kerala"
             width={30}
             height={30}
             priority
-          />
+          /> */}
           <span className="text-base font-semibold text-slate-900">
             Isha Kerala home
           </span>
