@@ -223,7 +223,7 @@ export default async function CentersCitySessionsPage({
           ) : citySessions.length === 0 ? (
             <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm">
               <p className="text-sm text-gray-600">
-                No upcoming published sessions found for this city yet.
+                No upcoming published sessions found for this center yet.
               </p>
             </div>
           ) : (
