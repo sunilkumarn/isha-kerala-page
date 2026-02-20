@@ -1,4 +1,5 @@
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 type Program = {
   id: string | number;
@@ -31,9 +32,7 @@ function minIsoDate(a: string | null, b: string | null) {
 }
 
 export async function getPublicProgramsFromPublishedSessions(
-  supabase: {
-    from: (table: string) => any;
-  },
+  supabase: SupabaseClient,
   {
     offset,
     limit,

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import GoogleAnalytics from "../components/GoogleAnalytics";
+import PublicHeader from "@/components/public/PublicHeader";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -48,6 +49,7 @@ gtag('config', 'G-XYC802D80H');
         <Suspense fallback={null}>
           <GoogleAnalytics />
         </Suspense>
+        <PublicHeader />
         {children}
       </body>
     </html>

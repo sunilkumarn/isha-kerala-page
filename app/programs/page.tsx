@@ -43,7 +43,7 @@ export default async function ProgramsPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7F6F2]  text-slate-900">
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-[#F7F6F2]  text-slate-900">
       <main className="flex-1">
         <section className="bg-[#1F2A63] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/sadhguru.jpg')" }}>
           <div className="mx-auto max-w-6xl px-6 py-16 text-center">

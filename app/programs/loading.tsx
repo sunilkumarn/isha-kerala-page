@@ -1,6 +1,6 @@
 export default function LoadingPrograms() {
   return (
-    <main className="min-h-screen bg-[#F7F6F2] text-slate-900">
+    <main className="min-h-[calc(100vh-4rem)] bg-[#F7F6F2] text-slate-900">
       <section className="bg-[#1F2A63]">
         <div className="mx-auto max-w-6xl px-6 py-16 text-center">
           <div className="mx-auto h-10 w-72 animate-pulse rounded-md bg-white/10 sm:h-12 sm:w-96" />

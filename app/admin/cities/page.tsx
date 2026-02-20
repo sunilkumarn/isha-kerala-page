@@ -14,11 +14,37 @@ import ConfirmDialog from "@/components/admin/ConfirmDialog";
 type City = {
   id: string | number;
   name: string;
+  slug?: string | null;
   image_url?: string | null;
   updated_at?: string | null;
 };
 
 const PAGE_SIZE = 20;
+
+async function ensureUniqueCitySlug(base: string, excludeId?: City["id"]) {
+  const trimmed = base.trim();
+  const safeBase = trimmed || "city";
+  let candidate = safeBase;
+
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    let query = supabase.from("cities").select("id").eq("slug", candidate).limit(1);
+    if (excludeId !== undefined && excludeId !== null) {
+      query = query.neq("id", excludeId as string | number);
+    }
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    if (!data || data.length === 0) return candidate;
+
+    candidate = `${safeBase}-${attempt + 2}`;
+  }
+
+  const fallbackSuffix =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? (crypto as Crypto).randomUUID().slice(0, 8)
+      : String(Date.now());
+  return `${safeBase}-${fallbackSuffix}`;
+}
 
 function CitiesPageInner() {
   const router = useRouter();
@@ -99,19 +125,35 @@ function CitiesPageInner() {
 
     setIsSaving(true);
     try {
+      const baseSlug = slugify(trimmedName);
+      const slug =
+        editingCity?.slug && editingCity.slug.trim()
+          ? editingCity.slug.trim()
+          : await ensureUniqueCitySlug(baseSlug, editingCity?.id);
+
       let imageUrl: string | null = null;
 
       if (cityImageFile) {
         const { publicUrl } = await uploadCityImage({
           file: cityImageFile,
-          slug: slugify(trimmedName),
+          slug,
         });
         imageUrl = publicUrl;
       }
 
-      const basePayload: { name: string; image_url?: string | null } = {
+      const basePayload: {
+        name: string;
+        slug?: string;
+        image_url?: string | null;
+      } = {
         name: trimmedName,
       };
+
+      if (!editingCity) {
+        basePayload.slug = slug;
+      } else if (!editingCity.slug) {
+        basePayload.slug = slug;
+      }
 
       if (imageUrl) {
         basePayload.image_url = imageUrl;

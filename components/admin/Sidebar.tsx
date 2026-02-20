@@ -36,7 +36,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-[#E2DED3] bg-[#EAE6DC] px-6 py-8">
+    <aside className="fixed bottom-0 left-0 top-16 flex w-64 flex-col border-r border-[#E2DED3] bg-[#EAE6DC] px-6 py-8">
       <div className="mb-10">
         <p className="text-lg font-medium tracking-wide text-[#2B2B2B]">
           Isha Kerala Admin

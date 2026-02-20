@@ -46,6 +46,37 @@ function ExternalLinkIcon({ className }: { className?: string }) {
   );
 }
 
+function CardLinkWrapper({
+  isExternal,
+  externalHref,
+  slug,
+  children,
+}: {
+  isExternal: boolean;
+  externalHref: string;
+  slug: string;
+  children: React.ReactNode;
+}) {
+  if (isExternal) {
+    return (
+      <a
+        href={externalHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block h-full"
+      >
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={`/programs/${encodeURIComponent(slug)}`} className="block h-full">
+      {children}
+    </Link>
+  );
+}
+
 export default function ProgramCard({ program }: { program: Program }) {
   const externalHref = (program.external_link ?? "").trim();
   const wantsExternal = Boolean(program.details_external);
@@ -57,37 +88,13 @@ export default function ProgramCard({ program }: { program: Program }) {
       )}`
     : null;
 
-  const Wrapper = ({
-    children,
-  }: {
-    children: React.ReactNode;
-  }): React.ReactNode => {
-    if (isExternal) {
-      return (
-        <a
-          href={externalHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block h-full"
-        >
-          {children}
-        </a>
-      );
-    }
-
-    return (
-      <Link
-        href={`/programs/${encodeURIComponent(program.slug)}`}
-        className="block h-full"
-      >
-        {children}
-      </Link>
-    );
-  };
-
   return (
     <article className="h-full overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <Wrapper>
+      <CardLinkWrapper
+        isExternal={isExternal}
+        externalHref={externalHref}
+        slug={program.slug}
+      >
         <div className="relative aspect-[4/3] w-full bg-slate-100">
           {cacheBustedImageUrl ? (
             // Use <img> to avoid Next image remotePatterns configuration.
@@ -124,7 +131,7 @@ export default function ProgramCard({ program }: { program: Program }) {
             </span>
           </div>
         </div>
-      </Wrapper>
+      </CardLinkWrapper>
     </article>
   );
 }

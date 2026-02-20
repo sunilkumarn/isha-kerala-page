@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { slugify } from "@/lib/slugify";
 import Button from "@/components/admin/Button";
 import Pagination from "@/components/admin/Pagination";
 import VenueModal from "@/components/admin/VenueModal";
@@ -191,10 +190,11 @@ function VenuesPageInner() {
 
     setIsSaving(true);
 
-    const selectedCityName =
-      cities.find((city) => String(city.id) === String(payload.cityId))?.name ?? "";
+    const selectedCity = cities.find(
+      (city) => String(city.id) === String(payload.cityId)
+    );
 
-    if (!selectedCityName.trim()) {
+    if (!selectedCity) {
       setErrorMessage("Please select a valid city.");
       setIsSaving(false);
       return;
@@ -202,8 +202,6 @@ function VenuesPageInner() {
 
     const venuePayload = {
       name: payload.name,
-      // IMPORTANT: venue.slug is used in public routing as the city's slug (city names are unique).
-      slug: slugify(selectedCityName),
       city_id: payload.cityId,
       address: payload.address || null,
       google_maps_url: payload.googleMapsUrl || null,

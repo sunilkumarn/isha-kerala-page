@@ -16,11 +16,15 @@ type Program = {
 type Venue = {
   id: string | number;
   name: string;
-  slug: string;
   address: string | null;
   google_maps_url: string | null;
   city_id: string | number | null;
-  cities?: { name: string; image_url?: string | null; updated_at?: string | null } | null;
+  cities?: {
+    name: string;
+    slug?: string | null;
+    image_url?: string | null;
+    updated_at?: string | null;
+  } | null;
 };
 
 function getTodayLocalISODate() {
@@ -37,6 +41,10 @@ function looksLikeUuid(value: string) {
   );
 }
 
+function normalizeSlug(value: string) {
+  return decodeURIComponent(value).trim().toLowerCase();
+}
+
 export default async function ProgramVenuesPage({
   params,
 }: {
@@ -48,42 +56,46 @@ export default async function ProgramVenuesPage({
 
   const lookupByIdFirst = looksLikeUuid(programSlug);
 
-  const { data: programBySlugRows, error: programBySlugError } = await supabase
-    .from("programs")
-    .select("id, name, slug")
-    .eq("slug", programSlug)
-    .order("id", { ascending: true })
-    .limit(1);
+  let program: Program | null = null;
 
-  if (programBySlugError) {
-    console.error("Failed to load program by slug:", programBySlugError);
-    notFound();
-  }
+    const { data: programBySlugRows, error: programBySlugError } = await supabase
+      .from("programs")
+      .select("id, name, slug")
+      .eq("slug", programSlug)
+      .order("id", { ascending: true })
+      .limit(1);
 
-  const { data: programByIdRows, error: programByIdError } = lookupByIdFirst
-    ? await supabase
-        .from("programs")
-        .select("id, name, slug")
-        .eq("id", programSlug)
-        .order("id", { ascending: true })
-        .limit(1)
-    : { data: null, error: null };
+    if (programBySlugError) {
+      console.error("Failed to load program by slug:", programBySlugError);
+      notFound();
+    }
 
-  if (programByIdError) {
-    console.error("Failed to load program by id:", programByIdError);
-    notFound();
-  }
+    const { data: programByIdRows, error: programByIdError } = lookupByIdFirst
+      ? await supabase
+          .from("programs")
+          .select("id, name, slug")
+          .eq("id", programSlug)
+          .order("id", { ascending: true })
+          .limit(1)
+      : { data: null, error: null };
 
-  const programBySlug = (programBySlugRows?.[0] ?? null) as Program | null;
-  const programById = (programByIdRows?.[0] ?? null) as Program | null;
-  const program = (programBySlug ?? programById) as Program | null;
-  if (!program) notFound();
+    if (programByIdError) {
+      console.error("Failed to load program by id:", programByIdError);
+      notFound();
+    }
 
-  // Backwards compatibility: old URLs used /programs/:programId
-  // If we were hit with an ID, redirect to the canonical slug URL.
-  if (lookupByIdFirst && program.slug && programSlug !== program.slug) {
-    redirect(`/programs/${encodeURIComponent(program.slug)}`);
-  }
+    const programBySlug = (programBySlugRows?.[0] ?? null) as Program | null;
+    const programById = (programByIdRows?.[0] ?? null) as Program | null;
+    program = (programBySlug ?? programById) as Program | null;
+    if (!program) notFound();
+
+    // Backwards compatibility: old URLs used /programs/:programId
+    // If we were hit with an ID, redirect to the canonical slug URL.
+    if (lookupByIdFirst && program.slug && programSlug !== program.slug) {
+      redirect(`/programs/${encodeURIComponent(program.slug)}`);
+    }
+
+  let venues: Venue[] = [];
 
   const programId = (program as Program).id;
 
@@ -99,8 +111,6 @@ export default async function ProgramVenuesPage({
 
   const childIds = (children ?? []).map((child) => child.id);
   const programIds = childIds.length > 0 ? childIds : [programId];
-
-  let venues: Venue[] = [];
 
   if (programIds.length > 0) {
     const { data: sessionVenueRows, error: sessionsError } = await supabase
@@ -123,7 +133,7 @@ export default async function ProgramVenuesPage({
     if (venueIds.length > 0) {
       const { data: venueRows, error: venuesError } = await supabase
         .from("venues")
-        .select("*, cities(name, image_url, updated_at)")
+        .select("*, cities(name, slug, image_url, updated_at)")
         .in("id", venueIds)
         .order("name");
 
@@ -142,7 +152,8 @@ export default async function ProgramVenuesPage({
       cityName: string;
       imageUrl: string | null;
       updatedAt: string | null;
-      venueSlug: string;
+      slug: string;
+      slugSource: "db" | "derived";
     };
 
     const map = new Map<string, CityCard>();
@@ -152,9 +163,10 @@ export default async function ProgramVenuesPage({
       const imageUrl = venue.cities?.image_url ?? null;
       const updatedAt = venue.cities?.updated_at ?? null;
       const cityKey = venue.city_id ? `city:${String(venue.city_id)}` : `name:${cityName}`;
-
-      const preferredSlug = cityName ? slugify(cityName) : null;
-      const isPreferred = preferredSlug ? venue.slug === preferredSlug : false;
+      const derivedSlug = slugify(cityName);
+      const dbCitySlug = venue.cities?.slug?.trim() || "";
+      const citySlug = dbCitySlug || derivedSlug;
+      const slugSource: CityCard["slugSource"] = dbCitySlug ? "db" : "derived";
 
       const existing = map.get(cityKey);
       if (!existing) {
@@ -163,24 +175,17 @@ export default async function ProgramVenuesPage({
           cityName,
           imageUrl,
           updatedAt,
-          venueSlug: venue.slug,
+          slug: citySlug,
+          slugSource,
         });
         continue;
       }
 
-      const existingIsPreferred = preferredSlug
-        ? existing.venueSlug === preferredSlug
-        : false;
+      if (existing.slugSource === "derived" && slugSource === "db" && existing.slug !== citySlug) {
+        map.set(cityKey, { ...existing, slug: citySlug, slugSource: "db" });
+      }
 
-      if (!existingIsPreferred && isPreferred) {
-        map.set(cityKey, {
-          cityKey,
-          cityName,
-          imageUrl: existing.imageUrl ?? imageUrl,
-          updatedAt: existing.updatedAt ?? updatedAt,
-          venueSlug: venue.slug,
-        });
-      } else if (!existing.imageUrl && imageUrl) {
+      if (!existing.imageUrl && imageUrl) {
         map.set(cityKey, { ...existing, imageUrl, updatedAt: existing.updatedAt ?? updatedAt });
       }
     }
@@ -191,7 +196,7 @@ export default async function ProgramVenuesPage({
   })();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7F4EE]">
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-[#F7F4EE]">
       <main className="flex-1">
         <header className="bg-indigo-950 text-white">
           <div className="mx-auto max-w-6xl px-6 py-14 text-center">
@@ -204,7 +209,7 @@ export default async function ProgramVenuesPage({
             </Link>
 
             <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
-              {(program as Program).name} Programs
+              { `${(program as Program).name} Programs`}
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-white/80 md:text-base">
               Select your city to explore upcoming sessions
@@ -236,7 +241,7 @@ export default async function ProgramVenuesPage({
                                 city.updatedAt ?? ""
                               )}`
                             : "/city-image.jpeg"
-                        }")`,
+                        }")`, 
                       }}
                     >
                       <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
@@ -251,7 +256,7 @@ export default async function ProgramVenuesPage({
                     <Link
                       href={`/programs/${encodeURIComponent(
                         (program as Program).slug
-                      )}/venues/${encodeURIComponent(city.venueSlug)}`}
+                      )}/centers/${encodeURIComponent(city.slug)}`}
                       className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
                     >
                       View details
