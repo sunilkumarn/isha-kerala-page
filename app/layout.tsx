@@ -15,7 +15,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "Welcome to Isha kerala page",
-  description: "Minimal Next.js + Supabase starter",
+  description: "See details of upcoming programs in your city",
   icons: {
     icon: "/isha-favicon.ico",
   },
