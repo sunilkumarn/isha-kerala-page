@@ -382,7 +382,7 @@ export default async function ProgramCitySessionsPage({
                     : null;
                   const whatsAppShareHref = shareUrl
                     ? `https://wa.me/?text=${encodeURIComponent(
-                        `See upcoming session details: ${shareUrl}`
+                      `Please see the upcoming session details of ${programInfo?.name} program in ${cityDisplayName}: ${shareUrl}`
                       )}`
                     : null;
 
@@ -676,13 +676,15 @@ export default async function ProgramCitySessionsPage({
       <main className="flex-1">
         <header className="bg-indigo-950 text-white">
           <div className="mx-auto max-w-6xl px-6 py-14 text-center">
-            <Link
-              href={`/programs/${encodeURIComponent(program.slug)}`}
-              className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
-            >
-              <span aria-hidden="true">←</span>
-              Back to {program.name} program
-            </Link>
+            {!venueParamRaw && !dateParamRaw ? (
+              <Link
+                href={`/programs/${encodeURIComponent(program.slug)}`}
+                className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
+              >
+                <span aria-hidden="true">←</span>
+                Back to {program.name} program
+              </Link>
+            ) : null}
 
             <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
               {title}
