@@ -83,7 +83,7 @@ export default async function ProgramsPage() {
 
         <section className="mx-auto max-w-6xl px-6 pb-16 sm:pb-20">
           <div className="rounded-3xl border border-black/5 bg-white px-6 py-12 text-center shadow-sm sm:px-10 sm:py-14">
-            <div className="mx-auto bg-green-500 flex h-14 w-14 items-center justify-center rounded-full">
+            <div className="mx-auto bg-green-300 flex h-14 w-14 items-center justify-center rounded-full">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
