@@ -3,6 +3,7 @@ import { getPublicProgramsFromPublishedSessions } from "@/lib/public-programs";
 import PublicFooter from "@/components/public/PublicFooter";
 import NeedAssistanceSection from "@/components/public/NeedAssistanceSection";
 import ProgramsGridWithPagination from "@/components/public/ProgramsGridWithPagination";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +79,48 @@ export default async function ProgramsPage() {
               pageSize={PAGE_SIZE}
             />
           )}
+        </section>
+
+        <section className="mx-auto max-w-6xl px-6 pb-16 sm:pb-20">
+          <div className="rounded-3xl border border-black/5 bg-white px-6 py-12 text-center shadow-sm sm:px-10 sm:py-14">
+            <div className="mx-auto bg-green-500 flex h-14 w-14 items-center justify-center rounded-full">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                className="h-6 w-6 text-[#FFF]"
+              >
+                <path
+                  d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M12 13.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                />
+              </svg>
+            </div>
+
+            <h2 className="mt-7 text-3xl tracking-tight text-slate-900 sm:text-4xl">
+              Looking for a Center Near You?
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base">
+              Explore all our centers across Kerala and find programs happening close
+              to you.
+            </p>
+
+            <div className="mt-8">
+              <Link
+                href="/centers"
+                className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-8 py-3 text-sm font-medium text-white shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/50 focus:ring-offset-2"
+              >
+                View All Centers
+              </Link>
+            </div>
+          </div>
         </section>
 
         <NeedAssistanceSection />
