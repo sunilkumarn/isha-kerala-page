@@ -260,358 +260,64 @@ export default async function ProgramCitySessionsPage({
     }
   }
 
-  if (isAllPrograms) {
-    const shouldSkipSessionsQuery =
-      Boolean(dateParamErrorMessage) ||
-      (Boolean(venueParam) && !venueLookupErrorMessage && !venueWasFound);
-
-    const { data: sessionRows, error: sessionsError } = shouldSkipSessionsQuery
-      ? { data: [], error: null }
-      : await (() => {
-          let query = supabase
-            .from("sessions")
-            .select(
-              `
-                id,
-                start_date,
-                end_date,
-                start_time,
-                end_time,
-                language,
-                registrations_allowed,
-                registration_link,
-                open_without_registration,
-                programs(name, slug, image_url, updated_at, colour, sub_text),
-                venues(name, slug, google_maps_url, cities(name, slug)),
-                contacts(phone, whatsapp)
-              `
-            )
-            .eq("is_published", true)
-            .order("start_date", { ascending: true });
-
-          if (venueId) query = query.eq("venue_id", venueId);
-          if (startDateParam) {
-            query = query.eq("start_date", startDateParam);
-          } else {
-            query = query.gte("start_date", today);
-          }
-
-          return query;
-        })();
-
-    const sessionsErrorMessage =
-      dateParamErrorMessage ??
-      venueLookupErrorMessage ??
-      sessionsError?.message ??
-      null;
-    const targetCitySlug = normalizeSlug(citySlug);
-
-    const allSessions = ((sessionRows ?? []) as Session[]).filter(Boolean);
-    const citySessions = allSessions.filter((session) => {
-      const city = getCityFromSession(session);
-      if (!city) return false;
-      const dbSlug = city.dbSlug ? normalizeSlug(city.dbSlug) : null;
-      const derivedSlug = city.derivedSlug ? normalizeSlug(city.derivedSlug) : null;
-      return dbSlug === targetCitySlug || derivedSlug === targetCitySlug;
-    });
-
-    const cityDisplayName = (citySessions.length > 0
-      ? getCityFromSession(citySessions[0])?.name
-      : null) ?? citySlug;
-
-    const title = `All programs in ${cityDisplayName}`;
-
-    return (
-      <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-[#F7F4EE]">
-        <main className="flex-1">
-          <header className="bg-indigo-950 text-white">
-            <div className="mx-auto max-w-6xl px-6 py-14 text-center">
-              <Link
-                href="/centers"
-                className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
-              >
-                <span aria-hidden="true">←</span>
-                Back to Centers
-              </Link>
-
-              <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
-                {title}
-              </h1>
-              <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
-              <p className="mx-auto mt-4 max-w-2xl text-sm text-white/80 md:text-base">
-                Upcoming sessions
-              </p>
-            </div>
-          </header>
-
-          <section className="mx-auto max-w-6xl px-6 py-12">
-            {sessionsErrorMessage ? (
-              <div className="rounded-xl border border-red-200 bg-white p-6 text-sm text-red-700">
-                Failed to load sessions: {sessionsErrorMessage}
-              </div>
-            ) : citySessions.length === 0 ? (
-              <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm">
-                <p className="text-sm text-gray-600">
-                  No upcoming published sessions found for this center yet.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {citySessions.map((session) => {
-                  const programInfo = getProgramFromSession(session);
-                  const venueInfo = getVenueFromSession(session);
-                  const contactInfo = getContactFromSession(session);
-
-                  const mapsHref = toSafeHttpUrl(venueInfo?.google_maps_url);
-                  const registrationsAllowed = Boolean(session.registrations_allowed);
-                  const openWithoutRegistration = Boolean(
-                    session.open_without_registration
-                  );
-                  const registrationHref = toSafeHttpUrl(session.registration_link);
-                  const phoneHref = toTelHref(contactInfo?.phone);
-                  const timeRange = formatSessionTimeRange(session);
-                  const shareProgramSlug = programInfo?.slug?.trim() || null;
-                  const shareVenueSlug = venueInfo?.slug?.trim() || null;
-                  const shareDate = session.start_date;
-                  const shareToken =
-                    shareProgramSlug && shareVenueSlug && shareDate
-                      ? `${shareProgramSlug}-${normalizeSlug(citySlug)}-${shareVenueSlug}-${shareDate}`
-                      : null;
-                  const shareUrl = shareToken
-                    ? `${origin ?? ""}/share-program/${encodeURIComponent(shareToken)}`
-                    : null;
-                  const whatsAppShareHref = shareUrl
-                    ? `https://wa.me/?text=${encodeURIComponent(
-                      `Please see the upcoming session details of ${programInfo?.name} program in ${cityDisplayName}: ${shareUrl}`
-                      )}`
-                    : null;
-
-                  return (
-                    <article
-                      key={String(session.id)}
-                      className="overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                    >
-                      <div className="relative aspect-[4/3] w-full bg-slate-100">
-                        {programInfo?.image_url ? (
-                          <Image
-                            src={`${programInfo.image_url}${
-                              programInfo.image_url.includes("?") ? "&" : "?"
-                            }v=${encodeURIComponent(programInfo.updated_at ?? "")}`}
-                            alt={programInfo?.name ?? "Program image"}
-                            fill
-                            className="object-cover"
-                            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                            priority={false}
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-xs font-medium text-slate-500">
-                              No image
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-6">
-                        <div className="text-center">
-                          <h3 className="text-xl text-slate-900">
-                            {programInfo?.name ?? "Program"}
-                          </h3>
-                          {programInfo?.sub_text ? (
-                            <p className="mt-0 text-sm text-slate-600 line-clamp-2">
-                              {programInfo.sub_text}
-                            </p>
-                          ) : null}
-                        </div>
-
-                        {registrationsAllowed || openWithoutRegistration ? (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {openWithoutRegistration ? (
-                              <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                                Open to all
-                              </span>
-                            ) : null}
-                          </div>
-                        ) : (
-                          <p className="mt-3 text-xs font-medium text-slate-600">
-                            Contact for details
-                          </p>
-                        )}
-
-                        <dl className="mt-4 space-y-2 text-sm text-slate-600">
-                          <div className="flex gap-2">
-                            <dt className="w-20 shrink-0 text-slate-500">Venue</dt>
-                            <dd className="font-medium text-slate-700">
-                              <span className="flex flex-wrap items-center gap-2">
-                                <span>{venueInfo?.name ?? "—"}</span>
-                                {mapsHref ? (
-                                  <a
-                                    href={mapsHref}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
-                                  >
-                                   <svg
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.8"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path d="M12 21s7-4.5 7-10a7 7 0 1 0-14 0c0 5.5 7 10 7 10Z" />
-                                    <path d="M12 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
-                                  </svg>
-                                    Google maps
-                                  </a>
-                                ) : null}
-                              </span>
-                            </dd>
-                          </div>
-                          <div className="flex gap-2">
-                            <dt className="w-20 shrink-0 text-slate-500">Date</dt>
-                            <dd className="font-medium text-slate-700">
-                              {formatSessionDates(session)}
-                            </dd>
-                          </div>
-                          {timeRange ? (
-                            <div className="flex gap-2">
-                              <dt className="w-20 shrink-0 text-slate-500">Time</dt>
-                              <dd className="font-medium text-slate-700">
-                                {timeRange}
-                              </dd>
-                            </div>
-                          ) : null}
-                          {session.language ? (
-                            <div className="flex gap-2">
-                              <dt className="w-20 shrink-0 text-slate-500">
-                                Language
-                              </dt>
-                              <dd className="font-medium text-slate-700">
-                                {session.language}
-                              </dd>
-                            </div>
-                          ) : null}
-                          <div className="flex gap-2">
-                            <dt className="w-20 shrink-0 text-slate-500">Phone</dt>
-                            <dd className="font-medium text-slate-700">
-                              {phoneHref ? (
-                                <a href={phoneHref} className="hover:underline">
-                                  {contactInfo?.phone}
-                                </a>
-                              ) : (
-                                (contactInfo?.phone ?? "—")
-                              )}
-                            </dd>
-                          </div>
-                        </dl>
-
-                        {registrationsAllowed || whatsAppShareHref ? (
-                          <div className="mt-6">
-                            {registrationsAllowed ? (
-                              <a
-                                href={registrationHref ?? undefined}
-                                aria-disabled={!registrationHref}
-                                className={`inline-flex w-full items-center justify-center rounded-full px-6 py-2 text-sm font-semibold text-white shadow-sm transition ${
-                                  registrationHref
-                                    ? "bg-[#F28C18] hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/50 focus:ring-offset-2"
-                                    : "cursor-not-allowed bg-slate-300"
-                                }`}
-                                target={registrationHref ? "_blank" : undefined}
-                                rel={registrationHref ? "noopener noreferrer" : undefined}
-                              >
-                                Register/Enquire Now
-                              </a>
-                            ) : null}
-                            {whatsAppShareHref ? (
-                              <a
-                                href={whatsAppShareHref}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`${registrationsAllowed ? "mt-3 " : ""}inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-green-600 bg-white px-6 py-2 text-sm font-semibold text-green-700 shadow-sm transition hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-600/30 focus:ring-offset-2`}
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  viewBox="0 0 32 32"
-                                  className="h-5 w-5"
-                                  fill="currentColor"
-                                >
-                                  <path d="M19.11 17.61c-.23-.12-1.34-.66-1.55-.74-.21-.08-.36-.12-.51.12-.15.23-.59.74-.72.89-.13.15-.27.17-.5.06-.23-.12-.98-.36-1.86-1.16-.69-.61-1.15-1.36-1.28-1.59-.13-.23-.01-.36.1-.47.1-.1.23-.27.34-.4.11-.13.15-.23.23-.38.08-.15.04-.29-.02-.4-.06-.12-.51-1.23-.7-1.68-.18-.43-.37-.37-.51-.38h-.44c-.15 0-.4.06-.61.29-.21.23-.8.78-.8 1.9s.82 2.2.93 2.36c.12.15 1.61 2.46 3.89 3.45.54.23.96.37 1.29.47.54.17 1.03.15 1.42.09.43-.06 1.34-.55 1.53-1.08.19-.53.19-.98.13-1.08-.06-.1-.21-.15-.44-.27ZM16.02 5.33c-5.87 0-10.64 4.77-10.64 10.64 0 1.87.49 3.7 1.43 5.31l-1.52 5.54 5.67-1.49a10.6 10.6 0 0 0 5.06 1.29h.01c5.87 0 10.64-4.77 10.64-10.64 0-2.84-1.11-5.51-3.12-7.52a10.57 10.57 0 0 0-7.53-3.12Zm0 19.49h-.01c-1.62 0-3.21-.44-4.6-1.28l-.33-.19-3.37.88.9-3.29-.21-.34a8.8 8.8 0 0 1-1.35-4.7c0-4.86 3.96-8.82 8.82-8.82 2.36 0 4.58.92 6.25 2.59a8.78 8.78 0 0 1 2.59 6.25c0 4.86-3.96 8.82-8.69 8.9Z" />
-                                </svg>
-                                Share this program
-                              </a>
-                            ) : null}
-                          </div>
-                        ) : null}
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-        </main>
-
-        <PublicFooter />
-      </div>
-    );
-  }
-
-  const lookupProgramByIdFirst = looksLikeUuid(programSlug);
-
-  const { data: programBySlugRows, error: programBySlugError } = await supabase
-    .from("programs")
-    .select("id, name, slug")
-    .eq("slug", programSlug)
-    .order("id", { ascending: true })
-    .limit(1);
-
-  const { data: programByIdRows, error: programByIdError } = lookupProgramByIdFirst
-    ? await supabase
-        .from("programs")
-        .select("id, name, slug")
-        .eq("id", programSlug)
-        .order("id", { ascending: true })
-        .limit(1)
-    : { data: null, error: null };
-
-  if (programBySlugError || programByIdError) {
-    console.error(
-      "Failed to load program:",
-      programBySlugError ?? programByIdError
-    );
-    notFound();
-  }
-
-  const programBySlug = (programBySlugRows?.[0] ?? null) as Program | null;
-  const programById = (programByIdRows?.[0] ?? null) as Program | null;
-  const program = (programBySlug ?? programById) as Program | null;
-  if (!program) notFound();
-
-  if (lookupProgramByIdFirst && program.slug && programSlug !== program.slug) {
-    redirect(
-      `/programs/${encodeURIComponent(program.slug)}/centers/${encodeURIComponent(citySlug)}`
-    );
-  }
-
-  const { data: children, error: childrenError } = await supabase
-    .from("programs")
-    .select("id")
-    .eq("parent_id", program.id);
-
-  if (childrenError) {
-    console.error("Failed to load child programs:", childrenError);
-    throw new Error(childrenError.message);
-  }
-
-  const childIds = (children ?? []).map((child) => child.id);
-  const programIds = Array.from(new Set([program.id, ...childIds]));
-
   const shouldSkipSessionsQuery =
     Boolean(dateParamErrorMessage) ||
     (Boolean(venueParam) && !venueLookupErrorMessage && !venueWasFound);
+
+  let program: Program | null = null;
+  let programIds: Array<string | number> | null = null;
+
+  if (!isAllPrograms) {
+    const lookupProgramByIdFirst = looksLikeUuid(programSlug);
+
+    const { data: programBySlugRows, error: programBySlugError } = await supabase
+      .from("programs")
+      .select("id, name, slug")
+      .eq("slug", programSlug)
+      .order("id", { ascending: true })
+      .limit(1);
+
+    const { data: programByIdRows, error: programByIdError } = lookupProgramByIdFirst
+      ? await supabase
+          .from("programs")
+          .select("id, name, slug")
+          .eq("id", programSlug)
+          .order("id", { ascending: true })
+          .limit(1)
+      : { data: null, error: null };
+
+    if (programBySlugError || programByIdError) {
+      console.error(
+        "Failed to load program:",
+        programBySlugError ?? programByIdError
+      );
+      notFound();
+    }
+
+    const programBySlug = (programBySlugRows?.[0] ?? null) as Program | null;
+    const programById = (programByIdRows?.[0] ?? null) as Program | null;
+    program = (programBySlug ?? programById) as Program | null;
+    if (!program) notFound();
+
+    if (lookupProgramByIdFirst && program.slug && programSlug !== program.slug) {
+      redirect(
+        `/programs/${encodeURIComponent(program.slug)}/centers/${encodeURIComponent(citySlug)}`
+      );
+    }
+
+    const { data: children, error: childrenError } = await supabase
+      .from("programs")
+      .select("id")
+      .eq("parent_id", program.id);
+
+    if (childrenError) {
+      console.error("Failed to load child programs:", childrenError);
+      throw new Error(childrenError.message);
+    }
+
+    const childIds = (children ?? []).map((child) => child.id);
+    programIds = Array.from(new Set([program.id, ...childIds]));
+  }
 
   const { data: sessionRows, error: sessionsError } = shouldSkipSessionsQuery
     ? { data: [], error: null }
@@ -634,10 +340,10 @@ export default async function ProgramCitySessionsPage({
               contacts(phone, whatsapp)
             `
           )
-          .in("program_id", programIds)
           .eq("is_published", true)
           .order("start_date", { ascending: true });
 
+        if (programIds) query = query.in("program_id", programIds);
         if (venueId) query = query.eq("venue_id", venueId);
         if (startDateParam) {
           query = query.eq("start_date", startDateParam);
@@ -669,22 +375,34 @@ export default async function ProgramCitySessionsPage({
     ? getCityFromSession(citySessions[0])?.name
     : null) ?? citySlug;
 
-  const title = `${program.name} in ${cityDisplayName}`;
+  const title = isAllPrograms
+    ? `All programs in ${cityDisplayName}`
+    : `${program?.name ?? "Program"} in ${cityDisplayName}`;
+
+  const backLink = isAllPrograms ? (
+    <Link
+      href="/centers"
+      className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
+    >
+      <span aria-hidden="true">←</span>
+      Back to Centers
+    </Link>
+  ) : !venueParamRaw && !dateParamRaw && program ? (
+    <Link
+      href={`/programs/${encodeURIComponent(program.slug)}`}
+      className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
+    >
+      <span aria-hidden="true">←</span>
+      Back to {program.name} program
+    </Link>
+  ) : null;
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-[#F7F4EE]">
       <main className="flex-1">
         <header className="bg-indigo-950 text-white">
           <div className="mx-auto max-w-6xl px-6 py-14 text-center">
-            {!venueParamRaw && !dateParamRaw ? (
-              <Link
-                href={`/programs/${encodeURIComponent(program.slug)}`}
-                className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
-              >
-                <span aria-hidden="true">←</span>
-                Back to {program.name} program
-              </Link>
-            ) : null}
+            {backLink}
 
             <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
               {title}
@@ -722,7 +440,9 @@ export default async function ProgramCitySessionsPage({
                 const registrationHref = toSafeHttpUrl(session.registration_link);
                 const phoneHref = toTelHref(contactInfo?.phone);
                 const timeRange = formatSessionTimeRange(session);
-                const shareProgramSlug = program.slug;
+                const shareProgramSlug = isAllPrograms
+                  ? (programInfo?.slug?.trim() || null)
+                  : (program?.slug ?? null);
                 const shareVenueSlug = venueInfo?.slug?.trim() || null;
                 const shareDate = session.start_date;
                 const shareToken =
@@ -732,9 +452,12 @@ export default async function ProgramCitySessionsPage({
                 const shareUrl = shareToken
                   ? `${origin ?? ""}/share-program/${encodeURIComponent(shareToken)}`
                   : null;
+
                 const whatsAppShareHref = shareUrl
                   ? `https://wa.me/?text=${encodeURIComponent(
-                      `See upcoming session details: ${shareUrl}`
+                      isAllPrograms
+                        ? `Please see the upcoming session details of ${programInfo?.name} program in ${cityDisplayName}: ${shareUrl}`
+                        : `See upcoming session details: ${shareUrl}`
                     )}`
                   : null;
 
@@ -767,7 +490,10 @@ export default async function ProgramCitySessionsPage({
                     <div className="p-6">
                       <div className="text-center">
                         <h3 className="text-xl text-slate-900">
-                          {programInfo?.name ?? program.name}
+                          {programInfo?.name ??
+                            (isAllPrograms
+                              ? "Program"
+                              : program?.name ?? "Program")}
                         </h3>
                         {programInfo?.sub_text ? (
                           <p className="mt-0 text-sm text-slate-600 line-clamp-2">
@@ -794,16 +520,16 @@ export default async function ProgramCitySessionsPage({
                         <div className="flex gap-2">
                           <dt className="w-20 shrink-0 text-slate-500">Venue</dt>
                           <dd className="font-medium text-slate-700">
-                              <span className="flex flex-wrap items-center gap-2">
-                                <span>{venueInfo?.name ?? "—"}</span>
-                                {mapsHref ? (
-                                  <a
-                                    href={mapsHref}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
-                                  >
-                                   <svg
+                            <span className="flex flex-wrap items-center gap-2">
+                              <span>{venueInfo?.name ?? "—"}</span>
+                              {mapsHref ? (
+                                <a
+                                  href={mapsHref}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
+                                >
+                                  <svg
                                     viewBox="0 0 24 24"
                                     aria-hidden="true"
                                     className="h-4 w-4"
@@ -816,11 +542,11 @@ export default async function ProgramCitySessionsPage({
                                     <path d="M12 21s7-4.5 7-10a7 7 0 1 0-14 0c0 5.5 7 10 7 10Z" />
                                     <path d="M12 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
                                   </svg>
-                                    Google maps
-                                  </a>
-                                ) : null}
-                              </span>
-                            </dd>
+                                  Google maps
+                                </a>
+                              ) : null}
+                            </span>
+                          </dd>
                         </div>
                         <div className="flex gap-2">
                           <dt className="w-20 shrink-0 text-slate-500">Date</dt>
@@ -831,7 +557,9 @@ export default async function ProgramCitySessionsPage({
                         {timeRange ? (
                           <div className="flex gap-2">
                             <dt className="w-20 shrink-0 text-slate-500">Time</dt>
-                            <dd className="font-medium text-slate-700">{timeRange}</dd>
+                            <dd className="font-medium text-slate-700">
+                              {timeRange}
+                            </dd>
                           </div>
                         ) : null}
                         {session.language ? (
@@ -852,7 +580,7 @@ export default async function ProgramCitySessionsPage({
                                 {contactInfo?.phone}
                               </a>
                             ) : (
-                              (contactInfo?.phone ?? "—")
+                              contactInfo?.phone ?? "—"
                             )}
                           </dd>
                         </div>
@@ -870,7 +598,9 @@ export default async function ProgramCitySessionsPage({
                                   : "cursor-not-allowed bg-slate-300"
                               }`}
                               target={registrationHref ? "_blank" : undefined}
-                              rel={registrationHref ? "noopener noreferrer" : undefined}
+                              rel={
+                                registrationHref ? "noopener noreferrer" : undefined
+                              }
                             >
                               Register/Enquire Now
                             </a>
