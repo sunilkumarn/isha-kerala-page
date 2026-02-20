@@ -214,11 +214,11 @@ export default async function ProgramCitySessionsPage({
           <header className="bg-indigo-950 text-white">
             <div className="mx-auto max-w-6xl px-6 py-14 text-center">
               <Link
-                href="/programs"
+                href="/centers"
                 className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
               >
                 <span aria-hidden="true">←</span>
-                Back to Programs
+                Back to Centers
               </Link>
 
               <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
@@ -500,7 +500,7 @@ export default async function ProgramCitySessionsPage({
               className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
             >
               <span aria-hidden="true">←</span>
-              Back to Cities
+              Back to {program.name} program
             </Link>
 
             <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
