@@ -455,9 +455,9 @@ export default async function ProgramCitySessionsPage({
 
                 const whatsAppShareHref = shareUrl
                   ? `https://wa.me/?text=${encodeURIComponent(
-                      isAllPrograms
-                        ? `Please see the upcoming session details of ${programInfo?.name} program in ${cityDisplayName}: ${shareUrl}`
-                        : `See upcoming session details: ${shareUrl}`
+                      `Please see the upcoming session details of ${
+                        programInfo?.name ?? program?.name ?? "this"
+                      } program in ${cityDisplayName}: ${shareUrl}`
                     )}`
                   : null;
 
@@ -517,17 +517,32 @@ export default async function ProgramCitySessionsPage({
                       )}
 
                       <dl className="mt-4 space-y-2 text-sm text-slate-600">
-                        <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 text-slate-500">Venue</dt>
-                          <dd className="font-medium text-slate-700">
-                            <span className="flex flex-wrap items-center gap-2">
-                              <span>{venueInfo?.name ?? "—"}</span>
+                        <div className="flex gap-3">
+                          <dt className="flex w-20 shrink-0 items-center gap-1.5 text-slate-500">
+                            <svg
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                              className="h-4 w-4 shrink-0 text-slate-400"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M12 21s7-4.5 7-10a7 7 0 1 0-14 0c0 5.5 7 10 7 10Z" />
+                              <path d="M12 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+                            </svg>
+                            <span>Venue</span>
+                          </dt>
+                          <dd className="min-w-0 pl-2 font-medium text-slate-700 break-words whitespace-normal">
+                            <div className="space-y-1">
+                              <div>{venueInfo?.name ?? "—"}</div>
                               {mapsHref ? (
                                 <a
                                   href={mapsHref}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
+                                  className="inline-flex w-fit items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
                                 >
                                   <svg
                                     viewBox="0 0 24 24"
@@ -545,36 +560,82 @@ export default async function ProgramCitySessionsPage({
                                   Google maps
                                 </a>
                               ) : null}
-                            </span>
+                            </div>
                           </dd>
                         </div>
-                        <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 text-slate-500">Date</dt>
-                          <dd className="font-medium text-slate-700">
+                        <div className="flex gap-3">
+                          <dt className="flex w-20 shrink-0 items-center gap-1.5 text-slate-500">
+                            <svg
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                              className="h-4 w-4 shrink-0 text-slate-400"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M8 2v3" />
+                              <path d="M16 2v3" />
+                              <path d="M3 9h18" />
+                              <path d="M5 5h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+                            </svg>
+                            <span>Date</span>
+                          </dt>
+                          <dd className="min-w-0 pl-2 font-medium text-slate-700 break-words whitespace-normal">
                             {formatSessionDates(session)}
                           </dd>
                         </div>
                         {timeRange ? (
-                          <div className="flex gap-2">
+                          <div className="flex gap-3">
                             <dt className="w-20 shrink-0 text-slate-500">Time</dt>
-                            <dd className="font-medium text-slate-700">
+                            <dd className="min-w-0 pl-2 font-medium text-slate-700 break-words whitespace-normal">
                               {timeRange}
                             </dd>
                           </div>
                         ) : null}
                         {session.language ? (
-                          <div className="flex gap-2">
-                            <dt className="w-20 shrink-0 text-slate-500">
-                              Language
+                          <div className="flex gap-3">
+                            <dt className="flex w-20 shrink-0 items-center gap-1.5 text-slate-500">
+                              <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                className="h-4 w-4 shrink-0 text-slate-400"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                <path d="M3 12h18" />
+                                <path d="M12 3a15 15 0 0 1 0 18" />
+                                <path d="M12 3a15 15 0 0 0 0 18" />
+                              </svg>
+                              <span>Language</span>
                             </dt>
-                            <dd className="font-medium text-slate-700">
+                            <dd className="min-w-0 pl-2 font-medium text-slate-700 break-words whitespace-normal">
                               {session.language}
                             </dd>
                           </div>
                         ) : null}
-                        <div className="flex gap-2">
-                          <dt className="w-20 shrink-0 text-slate-500">Phone</dt>
-                          <dd className="font-medium text-slate-700">
+                        <div className="flex gap-3">
+                          <dt className="flex w-20 shrink-0 items-center gap-1.5 text-slate-500">
+                            <svg
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                              className="h-4 w-4 shrink-0 text-slate-400"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 3.08 4.18 2 2 0 0 1 5.06 2h3a2 2 0 0 1 2 1.72c.12.86.33 1.7.62 2.5a2 2 0 0 1-.45 2.11L9.09 9.91a16 16 0 0 0 6 6l1.58-1.58a2 2 0 0 1 2.11-.45c.8.29 1.64.5 2.5.62A2 2 0 0 1 22 16.92Z" />
+                            </svg>
+                            <span>Phone</span>
+                          </dt>
+                          <dd className="min-w-0 pl-2 font-medium text-slate-700 break-words whitespace-normal">
                             {phoneHref ? (
                               <a href={phoneHref} className="hover:underline">
                                 {contactInfo?.phone}
