@@ -26,9 +26,6 @@ export default function PublicHeader() {
         </Link>
 
         <nav aria-label="Primary navigation" className="flex items-center gap-7">
-          <Link href="/programs" className={navLinkBase}>
-            PROGRAMS
-          </Link>
           <Link href="/centers" className={navLinkBase}>
             CENTERS
           </Link>

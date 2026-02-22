@@ -79,7 +79,7 @@ export default function CitiesSearchGrid({ cityCards }: { cityCards: CityCard[] 
                   <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-3xl font-semibold text-slate-700 mt-15">
-                      {city.cityName.toUpperCase()}
+                      {city.cityName}
                     </div>
                   </div>
                 </div>
