@@ -16,22 +16,15 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const { data, error: signInError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (signInError) {
       setError(signInError.message);
       setLoading(false);
       return;
-    }
-
-    // Minimal cookie for middleware protection. Replace with httpOnly cookies
-    // if you add server-side auth helpers in the future.
-    if (data.session?.access_token) {
-      document.cookie = `sb-access-token=${data.session.access_token}; Path=/; SameSite=Lax`;
     }
 
     setLoading(false);

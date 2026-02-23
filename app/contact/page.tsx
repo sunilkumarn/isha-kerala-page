@@ -54,7 +54,7 @@ function groupContactsByCity(contacts: Contact[]) {
 }
 
 export default async function ContactPage() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("contacts")

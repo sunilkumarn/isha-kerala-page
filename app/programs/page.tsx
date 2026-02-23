@@ -24,7 +24,7 @@ export const metadata = {
 };
 
 export default async function ProgramsPage() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const PAGE_SIZE = 6;
 

@@ -31,7 +31,7 @@ export async function GET(request: Request) {
   const limitRaw = parsePositiveInt(url.searchParams.get("limit"), 6);
   const limit = Math.min(50, Math.max(1, limitRaw));
 
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   try {
     const { programs, hasMore } = await getPublicProgramsFromPublishedSessions(

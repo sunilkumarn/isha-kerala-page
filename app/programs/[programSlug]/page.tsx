@@ -50,7 +50,7 @@ export default async function ProgramVenuesPage({
 }: {
   params: Promise<{ programSlug: string }>;
 }) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { programSlug } = await params;
   const today = getTodayLocalISODate();
 

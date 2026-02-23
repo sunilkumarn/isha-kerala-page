@@ -148,7 +148,7 @@ export default async function CentersCitySessionsPage({
 }: {
   params: Promise<{ citySlug: string }>;
 }) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { citySlug } = await params;
   const today = getTodayLocalISODate();
 

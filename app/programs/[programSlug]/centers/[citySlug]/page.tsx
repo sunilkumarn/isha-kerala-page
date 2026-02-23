@@ -211,7 +211,7 @@ export default async function ProgramCitySessionsPage({
   params: Promise<{ programSlug: string; citySlug: string }>;
   searchParams?: Promise<Record<string, SearchParamValue>>;
 }) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { programSlug, citySlug } = await params;
   const resolvedSearchParams = (await searchParams) ?? {};
   const today = getTodayLocalISODate();

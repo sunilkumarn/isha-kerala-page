@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { cookies } from "next/headers";
-
-import { createSupabaseServerClientWithAccessToken } from "@/lib/supabase-server";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 const ALLOWED_TABLES = new Set([
   "cities",
@@ -25,13 +23,14 @@ function isAllowedTable(value: string): value is AllowedTable {
 }
 
 export async function POST(request: Request) {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("sb-access-token")?.value;
-    if (!accessToken) {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const supabase = createSupabaseServerClientWithAccessToken(accessToken);
   
     const body = await request.json();
   

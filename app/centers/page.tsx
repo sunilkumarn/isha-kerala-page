@@ -14,7 +14,7 @@ type City = {
 };
 
 export default async function CentersCitiesPage() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data: cityRows, error } = await supabase
     .from("cities")

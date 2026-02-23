@@ -1,5 +1,8 @@
 import "server-only";
 
+import { cookies } from "next/headers";
+
+import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -8,7 +11,7 @@ import { createClient } from "@supabase/supabase-js";
  * Uses server env vars when available; falls back to NEXT_PUBLIC vars so the
  * app can still run in simple setups.
  */
-export function createSupabaseServerClient() {
+export async function createSupabaseServerClient() {
   const url =
     process.env.SUPABASE_URL ??
     process.env.NEXT_PUBLIC_SUPABASE_URL ??
@@ -26,40 +29,22 @@ export function createSupabaseServerClient() {
     );
   }
 
-  return createClient(url, key, {
-    auth: { persistSession: false },
-  });
-}
+  const cookieStore = await cookies();
 
-/**
- * Request-scoped Supabase client that runs as the authenticated user by
- * attaching a JWT access token.
- *
- * This is the right choice for admin API routes when you rely on RLS.
- */
-export function createSupabaseServerClientWithAccessToken(accessToken: string) {
-  const url =
-    process.env.SUPABASE_URL ??
-    process.env.NEXT_PUBLIC_SUPABASE_URL ??
-    "";
-
-  const key =
-    process.env.SUPABASE_ANON_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-    "";
-
-  if (!url || !key) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "Missing Supabase env vars. Set SUPABASE_URL + SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY)."
-    );
-  }
-
-  return createClient(url, key, {
-    auth: { persistSession: false },
-    global: {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+  return createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          try {
+            cookieStore.set(name, value, options);
+          } catch {
+            // In Server Components, Next's cookies are read-only. Middleware
+            // refresh should keep auth cookies up-to-date for reads.
+          }
+        });
       },
     },
   });

@@ -58,7 +58,7 @@ export async function GET(
     return NextResponse.redirect(new URL("/programs", request.url));
   }
 
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const [{ data: programRows, error: programError }, { data: venueRows, error: venueError }] =
     await Promise.all([

@@ -25,18 +25,15 @@ export default function Sidebar() {
     try {
       await supabase.auth.signOut();
     } catch {
-      // Best-effort logout; still clear cookie + redirect.
+      // Best-effort logout; still redirect.
     }
-
-    // Clear the cookie used by middleware.ts for /admin protection.
-    document.cookie = "sb-access-token=; Path=/; Max-Age=0; SameSite=Lax";
 
     setLoggingOut(false);
     router.push("/login");
   };
 
   return (
-    <aside className="fixed bottom-0 left-0 top-16 flex w-64 flex-col border-r border-[#E2DED3] bg-[#EAE6DC] px-6 py-8">
+    <aside className="fixed bottom-0 left-0 top-0 flex w-64 flex-col border-r border-[#E2DED3] bg-[#EAE6DC] px-6 py-8">
       <div className="mb-10">
         <p className="text-lg font-medium tracking-wide text-[#2B2B2B]">
           Isha Kerala Admin

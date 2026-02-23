@@ -1,10 +1,16 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navLinkBase =
   "text-xs font-semibold tracking-[0.22em] text-slate-700 transition hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/40 focus:ring-offset-2";
 
 export default function PublicHeader() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <header className="sticky top-0 z-50 h-16 border-b border-black/5 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
