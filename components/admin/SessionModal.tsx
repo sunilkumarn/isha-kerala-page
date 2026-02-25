@@ -89,7 +89,7 @@ export default function SessionModal({
   const [endDate, setEndDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [language, setLanguage] = useState("English");
+  const [language, setLanguage] = useState("");
   const [isPublished, setIsPublished] = useState(false);
   const [registrationsAllowed, setRegistrationsAllowed] = useState(false);
   const [registrationLink, setRegistrationLink] = useState("");
@@ -134,7 +134,7 @@ export default function SessionModal({
       setEndDate(initialSession?.end_date ?? "");
       setStartTime(initialSession?.start_time ?? "");
       setEndTime(initialSession?.end_time ?? "");
-      setLanguage(initialSession?.language ?? "English");
+      setLanguage(initialSession?.language ?? "");
       setIsPublished(Boolean(initialSession?.is_published));
       setRegistrationsAllowed(Boolean(initialSession?.registrations_allowed));
       setRegistrationLink(initialSession?.registration_link ?? "");
@@ -338,6 +338,7 @@ export default function SessionModal({
             onChange={(event) => setLanguage(event.target.value)}
             className="w-full rounded-md border border-[#E2DED3] bg-[#F6F4EF] px-3 py-2 text-sm text-[#2B2B2B]"
           >
+            <option value="">Select language (optional)</option>
             <option value="English">English</option>
             <option value="Malayalam">Malayalam</option>
           </select>

@@ -295,7 +295,7 @@ function SessionsPageInner() {
       end_date: payload.endDate || null,
       start_time: payload.startTime || null,
       end_time: payload.endTime || null,
-      language: payload.language,
+      language: payload.language.trim() || null,
       is_published: payload.isPublished,
       registrations_allowed: payload.registrationsAllowed,
       registration_link: payload.registrationsAllowed
