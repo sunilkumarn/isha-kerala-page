@@ -209,7 +209,7 @@ export default async function ProgramVenuesPage({
             </Link>
 
             <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
-              { `${(program as Program).name} Programs`}
+              { `${(program as Program).name}`}
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-white/80 md:text-base">
               Select your city to explore upcoming sessions

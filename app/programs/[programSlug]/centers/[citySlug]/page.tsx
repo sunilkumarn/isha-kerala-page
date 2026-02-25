@@ -377,7 +377,7 @@ export default async function ProgramCitySessionsPage({
 
   const title = isAllPrograms
     ? `All programs in ${cityDisplayName}`
-    : `${program?.name ?? "Program"} in ${cityDisplayName}`;
+    : `${program?.name ?? "Program"}`;
 
   const backLink = isAllPrograms ? (
     <Link
@@ -393,7 +393,7 @@ export default async function ProgramCitySessionsPage({
       className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
     >
       <span aria-hidden="true">←</span>
-      Back to {program.name} program
+      Back to {program.name}
     </Link>
   ) : null;
 
