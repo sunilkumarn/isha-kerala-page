@@ -455,7 +455,7 @@ export default async function ProgramCitySessionsPage({
 
                 const whatsAppShareHref = shareUrl
                   ? `https://wa.me/?text=${encodeURIComponent(
-                      `Please see the upcoming session details of ${
+                      `Details of upcoming ${
                         programInfo?.name ?? program?.name ?? "this"
                       } program in ${cityDisplayName}: ${shareUrl}`
                     )}`
