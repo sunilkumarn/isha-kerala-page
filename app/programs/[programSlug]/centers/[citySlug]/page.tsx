@@ -377,7 +377,7 @@ export default async function ProgramCitySessionsPage({
 
   const title = isAllPrograms
     ? `All programs in ${cityDisplayName}`
-    : `${program?.name ?? "Program"}`;
+    : `${program?.name ?? "Program"} in ${cityDisplayName}`;
 
   const backLink = isAllPrograms ? (
     <Link
@@ -385,12 +385,12 @@ export default async function ProgramCitySessionsPage({
       className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
     >
       <span aria-hidden="true">←</span>
-      Back to Centers
+      All Centers
     </Link>
   ) : !venueParamRaw && !dateParamRaw && program ? (
     <Link
       href={`/programs/${encodeURIComponent(program.slug)}`}
-      className="mx-auto inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
+      className="mx-auto inline-flex items-center gap-1 text-sm text-white/80 hover:text-white"
     >
       <span aria-hidden="true">←</span>
       Back to {program.name}
@@ -426,46 +426,47 @@ export default async function ProgramCitySessionsPage({
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {citySessions.map((session) => {
-                const programInfo = getProgramFromSession(session);
-                const venueInfo = getVenueFromSession(session);
-                const contactInfo = getContactFromSession(session);
+            <div className="space-y-12">
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {citySessions.map((session) => {
+                  const programInfo = getProgramFromSession(session);
+                  const venueInfo = getVenueFromSession(session);
+                  const contactInfo = getContactFromSession(session);
 
-                const mapsHref = toSafeHttpUrl(venueInfo?.google_maps_url);
-                const registrationsAllowed = Boolean(session.registrations_allowed);
-                const openWithoutRegistration = Boolean(
-                  session.open_without_registration
-                );
-                const registrationHref = toSafeHttpUrl(session.registration_link);
-                const phoneHref = toTelHref(contactInfo?.phone);
-                const timeRange = formatSessionTimeRange(session);
-                const shareProgramSlug = isAllPrograms
-                  ? (programInfo?.slug?.trim() || null)
-                  : (program?.slug ?? null);
-                const shareVenueSlug = venueInfo?.slug?.trim() || null;
-                const shareDate = session.start_date;
-                const shareToken =
-                  shareProgramSlug && shareVenueSlug && shareDate
-                    ? `${shareProgramSlug}-${normalizeSlug(citySlug)}-${shareVenueSlug}-${shareDate}`
+                  const mapsHref = toSafeHttpUrl(venueInfo?.google_maps_url);
+                  const registrationsAllowed = Boolean(session.registrations_allowed);
+                  const openWithoutRegistration = Boolean(
+                    session.open_without_registration
+                  );
+                  const registrationHref = toSafeHttpUrl(session.registration_link);
+                  const phoneHref = toTelHref(contactInfo?.phone);
+                  const timeRange = formatSessionTimeRange(session);
+                  const shareProgramSlug = isAllPrograms
+                    ? (programInfo?.slug?.trim() || null)
+                    : (program?.slug ?? null);
+                  const shareVenueSlug = venueInfo?.slug?.trim() || null;
+                  const shareDate = session.start_date;
+                  const shareToken =
+                    shareProgramSlug && shareVenueSlug && shareDate
+                      ? `${shareProgramSlug}-${normalizeSlug(citySlug)}-${shareVenueSlug}-${shareDate}`
+                      : null;
+                  const shareUrl = shareToken
+                    ? `${origin ?? ""}/share-program/${encodeURIComponent(shareToken)}`
                     : null;
-                const shareUrl = shareToken
-                  ? `${origin ?? ""}/share-program/${encodeURIComponent(shareToken)}`
-                  : null;
 
-                const whatsAppShareHref = shareUrl
-                  ? `https://wa.me/?text=${encodeURIComponent(
-                      `Details of upcoming ${
-                        programInfo?.name ?? program?.name ?? "this"
-                      } program in ${cityDisplayName}: ${shareUrl}`
-                    )}`
-                  : null;
+                  const whatsAppShareHref = shareUrl
+                    ? `https://wa.me/?text=${encodeURIComponent(
+                        `Details of upcoming ${
+                          programInfo?.name ?? program?.name ?? "this"
+                        } program in ${cityDisplayName}: ${shareUrl}`
+                      )}`
+                    : null;
 
-                return (
-                  <article
-                    key={String(session.id)}
-                    className="overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                  >
+                  return (
+                    <article
+                      key={String(session.id)}
+                      className="overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    >
                     <div className="relative aspect-[4/3] w-full bg-slate-100">
                       {programInfo?.image_url ? (
                         <Image
@@ -687,9 +688,43 @@ export default async function ProgramCitySessionsPage({
                         </div>
                       ) : null}
                     </div>
-                  </article>
-                );
-              })}
+                    </article>
+                  );
+                })}
+              </div>
+
+              {!isAllPrograms ? (
+                <div className="flex justify-center">
+                  <Link
+                    href={`/programs/all-programs/centers/${encodeURIComponent(citySlug)}`}
+                    className="inline-flex items-center gap-3 rounded-full bg-indigo-950 px-6 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-indigo-900 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-indigo-950"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M3 7h18" />
+                        <path d="M3 12h18" />
+                        <path d="M3 17h18" />
+                      </svg>
+                    </span>
+                    View All Programs in {cityDisplayName}
+                    <span aria-hidden="true" className="text-lg">
+                      →
+                    </span>
+                  </Link>
+                </div>
+              ) : null}
             </div>
           )}
         </section>
