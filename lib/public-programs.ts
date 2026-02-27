@@ -58,7 +58,7 @@ export async function getPublicProgramsFromPublishedSessions(
     .from("sessions")
     .select("program_id, start_date")
     .eq("is_published", true)
-    .or(`start_date.gte.${today},start_date.is.null`)
+    .or(`start_date.gt.${today},start_date.is.null`)
     .not("program_id", "is", null);
 
   if (sessionsError) {

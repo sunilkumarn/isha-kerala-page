@@ -348,7 +348,7 @@ export default async function ProgramCitySessionsPage({
         if (startDateParam) {
           query = query.eq("start_date", startDateParam);
         } else {
-          query = query.gte("start_date", today);
+          query = query.gt("start_date", today);
         }
 
         return query;
