@@ -2,7 +2,9 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, install dependencies:
+Ensure node is installed. Install version >= v22.14.0 using NVM(Node version manager). 
+
+Install dependencies:
 
 ```bash
 npm install
@@ -13,6 +15,8 @@ pnpm install
 # or
 bun install
 ```
+
+Copy .env.local.example to .env.local and add the key details in .env.local
 
 Then, run the development server:
 
