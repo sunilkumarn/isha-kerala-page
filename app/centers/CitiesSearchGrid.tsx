@@ -84,9 +84,13 @@ export default function CitiesSearchGrid({ cityCards }: { cityCards: CityCard[] 
                   >
                     <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-3xl font-semibold text-slate-700 mt-15">
-                        {city.cityName}
-                      </div>
+                      <div className={`font-semibold text-slate-700 mt-15 tracking-tight ${
+                      city.cityName.length > 15 
+                      ? 'text-xl sm:text-2xl tracking-tighter' 
+                      : 'text-3xl'
+                      }`}>
+                      {city.cityName}
+                    </div>
                     </div>
                   </div>
                 </div>
@@ -95,18 +99,25 @@ export default function CitiesSearchGrid({ cityCards }: { cityCards: CityCard[] 
                 <div className="mb-5 space-y-1 text-xs text-slate-500">
                   {city.contact && (
                     <p className="block">
-                      <span className="font-medium">Enquiry:</span>{" "}
-                      <a href={`tel:${city.contact}`} className="hover:text-[#F28C18] hover:underline">
+                      <span className="font-medium text-black">Enquiry:</span>{" "}
+                      <a 
+                        href={`tel:${city.contact}`} 
+                        className="text-gray-900 hover:text-[#F28C18] hover:underline"
+                        >
                         {city.contact}
-                      </a>
+                        </a>
                     </p>
                   )}
                   {city.email && (
-                    <p className="block truncate">
-                      <span className="font-medium">Email:</span>{" "}
-                      <a href={`mailto:${city.email}`} className="hover:text-[#F28C18] hover:underline" title={city.email}>
-                        {city.email}
-                      </a>
+                    <p className="block truncate text-gray-900">
+                    <span className="font-medium text-black"></span>{" "}
+                    <a 
+                    href={`mailto:${city.email}`} 
+                    className="text-gray-900 hover:text-[#F28C18] hover:underline" 
+                    title={city.email}
+                    >
+                    {city.email}
+                    </a>
                     </p>
                   )}
                 </div>
