@@ -5,35 +5,70 @@ import CitiesSearchGrid from "@/app/centers/CitiesSearchGrid";
 
 export const dynamic = "force-dynamic";
 
-type City = {
+type CityRow = {
   id: string | number;
   name: string;
-  slug?: string | null;
-  image_url?: string | null;
-  updated_at?: string | null;
+  image_url: string | null;
+  slug: string | null;
+};
+
+type ContactRow = {
+  city_id: string | number | null;
+  phone: string | null;
+  email: string | null;
+  is_center_specific: boolean;
 };
 
 export default async function CentersCitiesPage() {
   const supabase = await createSupabaseServerClient();
 
-  const { data: cityRows, error } = await supabase
-    .from("cities")
-    .select("id, name, slug, image_url, updated_at")
-    .order("name");
+  // 1. Fetching tables independently with parallel requests for safety and speed
+  const [citiesResponse, contactsResponse] = await Promise.all([
+    supabase.from("cities").select("id, name, image_url, slug").order("name"),
+    supabase.from("contacts").select("city_id, phone, email, is_center_specific")
+  ]);
 
-  const errorMessage = error?.message ?? null;
-  const cities = ((cityRows ?? []) as City[]).filter(Boolean);
+  const errorMessage = citiesResponse.error?.message ?? contactsResponse.error?.message ?? null;
 
-  const cityCards = cities.map((city) => {
+  const cityRows = (citiesResponse.data ?? []) as CityRow[];
+  const contactRows = (contactsResponse.data ?? []) as ContactRow[];
+
+  // 2. Map contacts by their city_id ONLY when marked center-specific
+  const centerContactMap = new Map<string | number, { phone: string | null; email: string | null }>();
+  
+  contactRows.forEach((contact) => {
+    if (contact.city_id) {
+      // STRICT GATEKEEPER: Only map the row if it's explicitly center specific.
+      // This ensures rows marked false are completely passed over and discarded.
+      if (contact.is_center_specific === true) {
+        if (!centerContactMap.has(contact.city_id)) {
+          centerContactMap.set(contact.city_id, {
+            phone: contact.phone ? contact.phone.trim() : null,
+            email: contact.email ? contact.email.trim() : null,
+          });
+        }
+      }
+    }
+  });
+
+  // 3. Construct your city cards and attach the isolated center contact details
+  const cityCards = cityRows.map((city) => {
     const cityName = city.name?.trim() || "Other";
     const dbSlug = city.slug?.trim() || "";
     const slug = dbSlug || slugify(cityName);
+    
+    // Attempt to pull a true-flagged center contact from our lookup map
+    const matchedCenterContact = centerContactMap.get(city.id);
+
     return {
       cityKey: `city:${String(city.id)}`,
       cityName,
       slug,
       imageUrl: city.image_url ?? null,
-      updatedAt: city.updated_at ?? null,
+      updatedAt: null, 
+      // If a matched center-specific contact exists, render it. Otherwise, pass null so the card remains blank!
+      contact: matchedCenterContact ? matchedCenterContact.phone : null, 
+      email: matchedCenterContact ? matchedCenterContact.email : null,
     };
   });
 
@@ -70,4 +105,3 @@ export default async function CentersCitiesPage() {
     </div>
   );
 }
-

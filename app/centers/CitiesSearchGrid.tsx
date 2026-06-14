@@ -9,6 +9,8 @@ type CityCard = {
   slug: string;
   imageUrl: string | null;
   updatedAt: string | null;
+  contact: string | null; // Added to capture your phone field passed from server
+  email: string | null;   // Added to capture your email field passed from server
 };
 
 function normalizeQuery(value: string) {
@@ -26,6 +28,7 @@ export default function CitiesSearchGrid({ cityCards }: { cityCards: CityCard[] 
 
   return (
     <div>
+      {/* Search Input Container */}
       <div className="mx-auto mb-10 flex w-full max-w-2xl justify-center">
         <div className="relative w-full">
           <svg
@@ -52,6 +55,7 @@ export default function CitiesSearchGrid({ cityCards }: { cityCards: CityCard[] 
         </div>
       </div>
 
+      {/* Grid Results Rendering */}
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm">
           <p className="text-sm text-gray-600">No matching cities found.</p>
@@ -61,30 +65,55 @@ export default function CitiesSearchGrid({ cityCards }: { cityCards: CityCard[] 
           {filtered.map((city) => (
             <div
               key={city.cityKey}
-              className="overflow-hidden rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm"
+              className="flex flex-col justify-between overflow-hidden rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm"
             >
-              <div className="-mx-8 -mt-8 mb-6">
-                <div
-                  className="relative aspect-[4/3] w-full bg-slate-100 bg-cover bg-center bg-no-repeat"
-                  style={{
-                    backgroundImage: `url("${
-                      city.imageUrl
-                        ? `${city.imageUrl}${
-                            city.imageUrl.includes("?") ? "&" : "?"
-                          }v=${encodeURIComponent(city.updatedAt ?? "")}`
-                        : "/city-image.jpeg"
-                    }")`,
-                  }}
-                >
-                  <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-3xl font-semibold text-slate-700 mt-15">
-                      {city.cityName}
+              <div>
+                {/* City Hero Image Section */}
+                <div className="-mx-8 -mt-8 mb-6">
+                  <div
+                    className="relative aspect-[4/3] w-full bg-slate-100 bg-cover bg-center bg-no-repeat"
+                    style={{
+                      backgroundImage: `url("${
+                        city.imageUrl
+                          ? `${city.imageUrl}${
+                              city.imageUrl.includes("?") ? "&" : "?"
+                            }v=${encodeURIComponent(city.updatedAt ?? "")}`
+                          : "/city-image.jpeg"
+                      }")`,
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-3xl font-semibold text-slate-700 mt-15">
+                        {city.cityName}
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Info Container: Renders phone & email details on your center-specific cards */}
+                <div className="mb-5 space-y-1 text-xs text-slate-500">
+                  {city.contact && (
+                    <p className="block">
+                      <span className="font-medium">Enquiry:</span>{" "}
+                      <a href={`tel:${city.contact}`} className="hover:text-[#F28C18] hover:underline">
+                        {city.contact}
+                      </a>
+                    </p>
+                  )}
+                  {city.email && (
+                    <p className="block truncate">
+                      <span className="font-medium">Email:</span>{" "}
+                      <a href={`mailto:${city.email}`} className="hover:text-[#F28C18] hover:underline" title={city.email}>
+                        {city.email}
+                      </a>
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="mt-5">
+
+              {/* Action Link Button */}
+              <div className="mt-auto pt-2">
                 <Link
                   href={`programs/all-programs/centers/${encodeURIComponent(city.slug)}`}
                   className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
@@ -99,4 +128,3 @@ export default function CitiesSearchGrid({ cityCards }: { cityCards: CityCard[] 
     </div>
   );
 }
-
