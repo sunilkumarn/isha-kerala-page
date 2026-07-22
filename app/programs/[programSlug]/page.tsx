@@ -246,9 +246,13 @@ export default async function ProgramVenuesPage({
                     >
                       <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-3xl font-semibold text-slate-700 mt-15">
-                          {city.cityName}
-                        </div>
+                        <div className={`font-semibold text-slate-700 mt-15 tracking-tight ${
+                      city.cityName.length > 15 
+                      ? 'text-xl sm:text-2xl tracking-tighter' 
+                      : 'text-3xl'
+                      }`}>
+                      {city.cityName}
+                    </div>
                       </div>
                     </div>
                   </div>
