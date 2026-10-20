@@ -3,7 +3,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import {
   InternalScheduleItem,
@@ -58,7 +57,6 @@ const INITIAL_FORM: Partial<InternalScheduleItem> = {
 };
 
 export default function SchedulePage() {
-  const router = useRouter();
   const [schedules, setSchedules] = useState<InternalScheduleItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -80,8 +78,6 @@ export default function SchedulePage() {
       } = await supabase.auth.getSession();
 
       const userEmail = session?.user?.email?.trim().toLowerCase() || "";
-      console.log("Logged in user email:", userEmail);
-
       if (userEmail === "kavitha@ishakerala.com") {
         setIsAdmin(true);
       } else {
@@ -110,9 +106,12 @@ export default function SchedulePage() {
   }, []);
 
   const fetchSchedules = async () => {
+    const todayStr = new Date().toISOString().split("T")[0];
+
     const { data, error } = await supabase
       .from("internal_schedules")
       .select("*")
+      .gte("start_date", todayStr) // Only upcoming or current date onwards
       .order("start_date", { ascending: true })
       .order("sort_order", { ascending: true });
 
@@ -285,7 +284,7 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        {/* Schedule Table Container */}
+        {/* Schedule Table Container (PDF/Export Ref) */}
         <div ref={pdfContainerRef} className="bg-[#F7F6F2] p-6 rounded-3xl">
           <div className="text-center pb-6 border-b-2 border-[#F28C18] mb-6">
             <h1 className="text-2xl font-bold text-[#1F2A63]">ISHA KERALA PROGRAMS</h1>
@@ -296,15 +295,16 @@ export default function SchedulePage() {
 
           {loading ? (
             <div className="text-center py-12 text-slate-500 text-sm">Loading schedule...</div>
+          ) : schedules.length === 0 ? (
+            <div className="text-center py-12 text-slate-500 text-sm">No upcoming programs found.</div>
           ) : (
             <div className="rounded-2xl border border-black/10 bg-white shadow-md overflow-x-auto">
               <table className="w-full min-w-[700px] text-left text-sm text-slate-800 table-fixed">
                 <colgroup>
                   <col className="w-[18%]" />
                   <col className="w-[20%]" />
-                  <col className={isAdmin ? "w-[28%]" : "w-[34%]" } />
-                  <col className="w-[18%]" />
-                  {isAdmin && <col className="w-[16%]" />}
+                  <col className="w-[34%]" />
+                  <col className="w-[28%]" />
                 </colgroup>
                 <thead className="bg-slate-100 text-slate-900 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
                   <tr>
@@ -312,7 +312,6 @@ export default function SchedulePage() {
                     <th className="px-5 py-3.5">Location</th>
                     <th className="px-5 py-3.5">Program</th>
                     <th className="px-5 py-3.5">Status</th>
-                    {isAdmin && <th className="px-5 py-3.5 text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -330,14 +329,9 @@ export default function SchedulePage() {
                         <td className="px-5 py-4 font-normal text-slate-800 text-sm">
                           {item.program_name}
                           {item.link_url && (
-                            <a
-                              href={item.link_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-2 text-xs text-[#F28C18] hover:underline inline-block"
-                            >
-                              [Link]
-                            </a>
+                            <span className="ml-2 text-xs text-[#F28C18] inline-block">
+                              [{item.link_url}]
+                            </span>
                           )}
                         </td>
                         <td className="px-5 py-4 whitespace-nowrap">
@@ -346,22 +340,6 @@ export default function SchedulePage() {
                             <span>{statusConfig.label}</span>
                           </span>
                         </td>
-                        {isAdmin && (
-                          <td className="px-5 py-4 whitespace-nowrap text-right space-x-2">
-                            <button
-                              onClick={() => handleOpenEditModal(item)}
-                              className="text-xs font-semibold text-slate-600 hover:text-[#1F2A63] bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(item.id, item.location_name)}
-                              className="text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition"
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        )}
                       </tr>
                     );
                   })}
@@ -370,6 +348,53 @@ export default function SchedulePage() {
             </div>
           )}
         </div>
+
+        {/* Interactive Admin Control Panel (Visible below table on screen for Edit/Delete actions) */}
+        {isAdmin && (
+          <div className="bg-white p-6 rounded-2xl border border-black/10 shadow-sm">
+            <h2 className="text-sm font-bold text-[#1F2A63] uppercase tracking-wider mb-4">
+              Admin Management Controls (Upcoming Programs)
+            </h2>
+            <div className="rounded-xl border border-slate-200 overflow-x-auto">
+              <table className="w-full min-w-[700px] text-left text-xs text-slate-800">
+                <thead className="bg-slate-50 text-slate-700 uppercase font-semibold border-b border-slate-200">
+                  <tr>
+                    <th className="px-4 py-3">Location & Program</th>
+                    <th className="px-4 py-3">Start Date</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3 text-right">Quick Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {schedules.map((item) => (
+                    <tr key={`admin-${item.id}`} className="hover:bg-slate-50">
+                      <td className="px-4 py-3">
+                        <div className="font-bold text-[#1F2A63]">{item.location_name}</div>
+                        <div className="text-slate-600">{item.program_name}</div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">{item.start_date}</td>
+                      <td className="px-4 py-3 whitespace-nowrap capitalize">{item.status.replace(/_/g, " ")}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-right space-x-2">
+                        <button
+                          onClick={() => handleOpenEditModal(item)}
+                          className="font-semibold text-slate-600 hover:text-[#1F2A63] bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id, item.location_name)}
+                          className="font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1 rounded transition"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* CREATE / EDIT MODAL (Admin Only) */}
