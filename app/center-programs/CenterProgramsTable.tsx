@@ -126,22 +126,23 @@ export default function CenterProgramsTable({ citiesData }: Props) {
     }
   };
 
-  // 3. Download Optimized Multi-Page PDF Function with Header Title
+  // 3. Download Optimized Multi-Page PDF Function
   const handleDownloadPDF = async () => {
     if (!tableContainerRef.current) return;
     setIsGeneratingPdf(true);
 
     const element = tableContainerRef.current;
 
-    // Create a temporary header element for the PDF
+    // Create an attractive temporary header for the PDF
     const pdfHeader = document.createElement("div");
-    pdfHeader.className = "pdf-temp-header mb-6 text-center";
+    pdfHeader.className = "pdf-temp-header";
+    pdfHeader.style.cssText =
+      "padding: 16px 0 24px 0; text-align: center; border-bottom: 3px solid #F28C18; margin-bottom: 20px;";
     pdfHeader.innerHTML = `
-      <h1 style="font-size: 24px; font-weight: bold; color: #1F2A63; margin-bottom: 4px;">Upcoming Programs in Kerala</h1>
-      <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">Isha Foundation • Center-wise Schedule</p>
+      <h1 style="font-size: 26px; font-weight: bold; color: #1F2A63; margin: 0 0 6px 0; letter-spacing: -0.5px;">Upcoming Programs in Kerala</h1>
+      <p style="font-size: 13px; font-weight: 700; color: #F28C18; margin: 0; text-transform: uppercase; letter-spacing: 1.5px;">Isha Foundation • Center Schedule</p>
     `;
-    
-    // Prepend header temporarily
+
     element.insertBefore(pdfHeader, element.firstChild);
 
     try {
@@ -151,13 +152,13 @@ export default function CenterProgramsTable({ citiesData }: Props) {
         backgroundColor: "#F7F6F2",
       });
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.85);
+      const imgData = canvas.toDataURL("image/jpeg", 0.9);
       const pdf = new jsPDF("p", "mm", "a4");
 
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
+
       let heightLeft = imgHeight;
       let position = 0;
 
@@ -176,7 +177,6 @@ export default function CenterProgramsTable({ citiesData }: Props) {
       console.error("Failed to export PDF:", err);
       alert("Could not export PDF. Please try again.");
     } finally {
-      // Remove temporary header element
       element.removeChild(pdfHeader);
       setIsGeneratingPdf(false);
     }
@@ -220,26 +220,26 @@ export default function CenterProgramsTable({ citiesData }: Props) {
       </div>
 
       {/* Unified Master Table Container */}
-      <div ref={tableContainerRef} className="bg-[#F7F6F2] p-4 rounded-3xl">
-        <div className="rounded-2xl border border-black/10 bg-white shadow-sm overflow-hidden">
-          <table className="w-full text-left text-xs sm:text-sm text-slate-700 table-fixed">
+      <div ref={tableContainerRef} className="bg-[#F7F6F2] p-3 sm:p-6 rounded-3xl">
+        <div className="rounded-2xl border border-black/10 bg-white shadow-md overflow-x-auto">
+          <table className="w-full min-w-[650px] text-left text-sm text-slate-800 table-fixed">
             <colgroup>
-              <col className="w-[30%]" />
-              <col className="w-[30%]" />
+              <col className="w-[32%]" />
+              <col className="w-[28%]" />
               <col className="w-[15%]" />
               <col className="w-[15%]" />
               <col className="w-[10%]" />
             </colgroup>
-            <thead className="bg-slate-100 text-slate-800 uppercase text-[11px] font-semibold tracking-wider border-b border-slate-200">
+            <thead className="bg-slate-100 text-slate-900 uppercase text-[12px] font-bold tracking-wider border-b border-slate-200">
               <tr>
-                <th scope="col" className="px-6 py-3">Program</th>
-                <th scope="col" className="px-6 py-3">Center / Venue</th>
-                <th scope="col" className="px-6 py-3">Start Date</th>
-                <th scope="col" className="px-6 py-3">End Date</th>
-                <th scope="col" className="px-6 py-3">Language</th>
+                <th scope="col" className="px-4 sm:px-6 py-3.5">Program</th>
+                <th scope="col" className="px-4 sm:px-6 py-3.5">Center / Venue</th>
+                <th scope="col" className="px-4 sm:px-6 py-3.5">Start Date</th>
+                <th scope="col" className="px-4 sm:px-6 py-3.5">End Date</th>
+                <th scope="col" className="px-4 sm:px-6 py-3.5">Language</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-200">
               {citiesData.map((city) => {
                 const citySessions = city.venues.flatMap((venue) =>
                   (venue.sessions || []).map((session) => ({
@@ -252,9 +252,9 @@ export default function CenterProgramsTable({ citiesData }: Props) {
 
                 return (
                   <React.Fragment key={city.id}>
-                    {/* City Sub-Header Row */}
-                    <tr className="bg-[#1F2A63]/5 border-t-2 border-[#1F2A63]/20">
-                      <td colSpan={5} className="px-6 py-3 text-sm font-bold tracking-tight text-[#1F2A63]">
+                    {/* Soft Light Amber/Yellow City Banner Header */}
+                    <tr className="bg-[#FEF3C7] border-y border-amber-200">
+                      <td colSpan={5} className="px-4 sm:px-6 py-3 text-base font-bold tracking-wide text-[#1F2A63]">
                         {city.name}
                       </td>
                     </tr>
@@ -266,20 +266,20 @@ export default function CenterProgramsTable({ citiesData }: Props) {
 
                       return (
                         <tr key={session.id} className="hover:bg-slate-50 transition">
-                          <td className="px-6 py-4 font-semibold text-slate-900 truncate">
+                          <td className="px-4 sm:px-6 py-4 font-medium text-slate-900 text-sm">
                             {program.name}
                           </td>
-                          <td className="px-6 py-4 font-medium text-slate-800 truncate">
+                          <td className="px-4 sm:px-6 py-4 font-normal text-slate-700 text-sm">
                             {session.venueName}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-800">
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap font-medium text-slate-800 text-sm">
                             {new Date(session.start_date).toLocaleDateString("en-IN", {
                               day: "numeric",
                               month: "short",
                               year: "numeric",
                             })}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-slate-600 text-sm">
                             {session.end_date
                               ? new Date(session.end_date).toLocaleDateString("en-IN", {
                                   day: "numeric",
@@ -288,7 +288,7 @@ export default function CenterProgramsTable({ citiesData }: Props) {
                                 })
                               : "-"}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-slate-600 text-sm font-normal">
                             {session.language || "English"}
                           </td>
                         </tr>
