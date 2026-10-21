@@ -128,7 +128,7 @@ export default function SchedulePage() {
     setLoading(false);
   };
 
-  // Unique lists for filter dropdowns
+  // Unique lists for autocomplete and filters
   const availableLocations = useMemo(() => {
     const locs = schedules.map((s) => s.location_name).filter(Boolean);
     return Array.from(new Set(locs)).sort();
@@ -317,7 +317,7 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        {/* Filters Toolbar - Clean Uniform Grid Alignment */}
+        {/* Filters Toolbar */}
         <div className="bg-white p-5 rounded-2xl border border-black/10 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Filter Programs</span>
@@ -338,7 +338,6 @@ export default function SchedulePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            {/* Location Filter */}
             <select
               value={filterLocation}
               onChange={(e) => setFilterLocation(e.target.value)}
@@ -352,7 +351,6 @@ export default function SchedulePage() {
               ))}
             </select>
 
-            {/* Program Filter */}
             <select
               value={filterProgram}
               onChange={(e) => setFilterProgram(e.target.value)}
@@ -366,7 +364,6 @@ export default function SchedulePage() {
               ))}
             </select>
 
-            {/* Status Filter */}
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -381,7 +378,6 @@ export default function SchedulePage() {
               <option value="cancelled">❌ Cancelled</option>
             </select>
 
-            {/* From Date Filter */}
             <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2">
               <span className="text-[11px] font-bold text-slate-500 uppercase">From:</span>
               <input
@@ -392,7 +388,6 @@ export default function SchedulePage() {
               />
             </div>
 
-            {/* To Date Filter */}
             <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2">
               <span className="text-[11px] font-bold text-slate-500 uppercase">To:</span>
               <input
@@ -405,7 +400,7 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        {/* Schedule Table Container (PDF/Export Ref) */}
+        {/* Schedule Table Container */}
         <div ref={pdfContainerRef} className="bg-[#F7F6F2] p-6 rounded-3xl">
           <div className="text-center pb-6 border-b-2 border-[#F28C18] mb-6">
             <h1 className="text-2xl font-bold text-[#1F2A63]">ISHA KERALA PROGRAMS</h1>
@@ -470,7 +465,7 @@ export default function SchedulePage() {
           )}
         </div>
 
-        {/* Interactive Admin Control Panel (Visible below table on screen for Edit/Delete actions) */}
+        {/* Admin Management Controls */}
         {isAdmin && (
           <div className="bg-white p-6 rounded-2xl border border-black/10 shadow-sm">
             <h2 className="text-sm font-bold text-[#1F2A63] uppercase tracking-wider mb-4">
@@ -535,6 +530,7 @@ export default function SchedulePage() {
             </div>
 
             <form onSubmit={handleSave} className="space-y-4">
+              {/* Location Name with Autocomplete */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                   Location Name *
@@ -542,13 +538,20 @@ export default function SchedulePage() {
                 <input
                   type="text"
                   required
+                  list="locations-list"
                   placeholder="e.g. WAYANAD or ???"
                   value={formData.location_name || ""}
                   onChange={(e) => setFormData({ ...formData, location_name: e.target.value })}
                   className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
                 />
+                <datalist id="locations-list">
+                  {availableLocations.map((loc) => (
+                    <option key={loc} value={loc} />
+                  ))}
+                </datalist>
               </div>
 
+              {/* Program Name with Autocomplete */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                   Program Name *
@@ -556,11 +559,17 @@ export default function SchedulePage() {
                 <input
                   type="text"
                   required
+                  list="programs-list"
                   placeholder="e.g. IEP Malayalam in-person"
                   value={formData.program_name || ""}
                   onChange={(e) => setFormData({ ...formData, program_name: e.target.value })}
                   className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
                 />
+                <datalist id="programs-list">
+                  {availablePrograms.map((prog) => (
+                    <option key={prog} value={prog} />
+                  ))}
+                </datalist>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
