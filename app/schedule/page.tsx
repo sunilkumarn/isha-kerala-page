@@ -272,7 +272,7 @@ export default function SchedulePage() {
   return (
     <div className="min-h-screen bg-[#F7F6F2] py-8 px-4 sm:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Top Control Bar - Option 1: Lotus Icon & Clean Pill Badge */}
+        {/* Top Control Bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-black/10 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F28C18]/10 text-xl text-[#F28C18]">
@@ -457,8 +457,15 @@ export default function SchedulePage() {
                         <td className="px-5 py-4 font-normal text-slate-800 text-sm">
                           <div>{item.program_name}</div>
                           {item.link_url && (
-                            <div className="text-xs text-[#F28C18] mt-1">
-                              [{item.link_url}]
+                            <div className="text-xs mt-1">
+                              <a
+                                href={item.link_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#F28C18] hover:underline inline-flex items-center gap-1 font-medium"
+                              >
+                                [{item.link_url}]
+                              </a>
                             </div>
                           )}
                         </td>
