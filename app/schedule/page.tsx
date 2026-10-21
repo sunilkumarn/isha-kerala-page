@@ -448,11 +448,11 @@ export default function SchedulePage() {
                           {item.location_name}
                         </td>
                         <td className="px-5 py-4 font-normal text-slate-800 text-sm">
-                          {item.program_name}
+                          <div>{item.program_name}</div>
                           {item.link_url && (
-                            <span className="ml-2 text-xs text-[#F28C18] inline-block">
+                            <div className="text-xs text-[#F28C18] mt-1">
                               [{item.link_url}]
-                            </span>
+                            </div>
                           )}
                         </td>
                         <td className="px-5 py-4 whitespace-nowrap">
