@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 import { supabase } from "@/lib/supabase";
@@ -64,6 +64,13 @@ export default function SchedulePage() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
 
+  // Filter States
+  const [filterLocation, setFilterLocation] = useState("");
+  const [filterProgram, setFilterProgram] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [startDateFrom, setStartDateFrom] = useState("");
+  const [startDateTo, setStartDateTo] = useState("");
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -111,7 +118,7 @@ export default function SchedulePage() {
     const { data, error } = await supabase
       .from("internal_schedules")
       .select("*")
-      .gte("start_date", todayStr) // Only upcoming or current date onwards
+      .gte("start_date", todayStr)
       .order("start_date", { ascending: true })
       .order("sort_order", { ascending: true });
 
@@ -120,6 +127,32 @@ export default function SchedulePage() {
     }
     setLoading(false);
   };
+
+  // Unique lists for filter dropdowns
+  const availableLocations = useMemo(() => {
+    const locs = schedules.map((s) => s.location_name).filter(Boolean);
+    return Array.from(new Set(locs)).sort();
+  }, [schedules]);
+
+  const availablePrograms = useMemo(() => {
+    const progs = schedules.map((s) => s.program_name).filter(Boolean);
+    return Array.from(new Set(progs)).sort();
+  }, [schedules]);
+
+  // Filtered schedules based on user selections
+  const filteredSchedules = useMemo(() => {
+    return schedules.filter((item) => {
+      const matchesLocation = filterLocation ? item.location_name === filterLocation : true;
+      const matchesProgram = filterProgram ? item.program_name === filterProgram : true;
+      const matchesStatus = filterStatus ? item.status === filterStatus : true;
+
+      const itemDate = item.start_date;
+      const matchesDateFrom = startDateFrom ? itemDate >= startDateFrom : true;
+      const matchesDateTo = startDateTo ? itemDate <= startDateTo : true;
+
+      return matchesLocation && matchesProgram && matchesStatus && matchesDateFrom && matchesDateTo;
+    });
+  }, [schedules, filterLocation, filterProgram, filterStatus, startDateFrom, startDateTo]);
 
   const handleOpenCreateModal = () => {
     setEditingId(null);
@@ -189,7 +222,7 @@ export default function SchedulePage() {
   };
 
   const handleCopyWhatsapp = () => {
-    const messageText = formatWhatsappText(schedules);
+    const messageText = formatWhatsappText(filteredSchedules);
     navigator.clipboard.writeText(messageText);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
@@ -284,6 +317,91 @@ export default function SchedulePage() {
           </div>
         </div>
 
+        {/* Filters Toolbar */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-black/10 shadow-sm space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Filter By:</span>
+
+            <select
+              value={filterLocation}
+              onChange={(e) => setFilterLocation(e.target.value)}
+              className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+            >
+              <option value="">All Locations</option>
+              {availableLocations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={filterProgram}
+              onChange={(e) => setFilterProgram(e.target.value)}
+              className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+            >
+              <option value="">All Programs</option>
+              {availablePrograms.map((prog) => (
+                <option key={prog} value={prog}>
+                  {prog}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+            >
+              <option value="">All Statuses</option>
+              <option value="confirmed">✅ Confirmed</option>
+              <option value="new_or_changed">🌦️ Newly added/changed</option>
+              <option value="ishanga_pending">❓ Ishanga pending</option>
+              <option value="center_unconfirmed">‼️ Center unconfirmed</option>
+              <option value="hall_unfinalized">❕ Hall unfinalized</option>
+              <option value="cancelled">❌ Cancelled</option>
+            </select>
+          </div>
+
+          {/* Date Range Filters */}
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 font-semibold">From:</span>
+              <input
+                type="date"
+                value={startDateFrom}
+                onChange={(e) => setStartDateFrom(e.target.value)}
+                className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 font-semibold">To:</span>
+              <input
+                type="date"
+                value={startDateTo}
+                onChange={(e) => setStartDateTo(e.target.value)}
+                className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+              />
+            </div>
+
+            {(filterLocation || filterProgram || filterStatus || startDateFrom || startDateTo) && (
+              <button
+                onClick={() => {
+                  setFilterLocation("");
+                  setFilterProgram("");
+                  setFilterStatus("");
+                  setStartDateFrom("");
+                  setStartDateTo("");
+                }}
+                className="text-xs font-semibold text-rose-600 hover:underline ml-auto"
+              >
+                Reset All Filters
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Schedule Table Container (PDF/Export Ref) */}
         <div ref={pdfContainerRef} className="bg-[#F7F6F2] p-6 rounded-3xl">
           <div className="text-center pb-6 border-b-2 border-[#F28C18] mb-6">
@@ -295,8 +413,8 @@ export default function SchedulePage() {
 
           {loading ? (
             <div className="text-center py-12 text-slate-500 text-sm">Loading schedule...</div>
-          ) : schedules.length === 0 ? (
-            <div className="text-center py-12 text-slate-500 text-sm">No upcoming programs found.</div>
+          ) : filteredSchedules.length === 0 ? (
+            <div className="text-center py-12 text-slate-500 text-sm">No programs found matching the selected filters.</div>
           ) : (
             <div className="rounded-2xl border border-black/10 bg-white shadow-md overflow-x-auto">
               <table className="w-full min-w-[700px] text-left text-sm text-slate-800 table-fixed">
@@ -315,7 +433,7 @@ export default function SchedulePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {schedules.map((item) => {
+                  {filteredSchedules.map((item) => {
                     const statusConfig = STATUS_CONFIG[item.status] || STATUS_CONFIG.confirmed;
 
                     return (
@@ -353,7 +471,7 @@ export default function SchedulePage() {
         {isAdmin && (
           <div className="bg-white p-6 rounded-2xl border border-black/10 shadow-sm">
             <h2 className="text-sm font-bold text-[#1F2A63] uppercase tracking-wider mb-4">
-              Admin Management Controls (Upcoming Programs)
+              Admin Management Controls ({filteredSchedules.length} Filtered Entries)
             </h2>
             <div className="rounded-xl border border-slate-200 overflow-x-auto">
               <table className="w-full min-w-[700px] text-left text-xs text-slate-800">
@@ -366,7 +484,7 @@ export default function SchedulePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {schedules.map((item) => (
+                  {filteredSchedules.map((item) => (
                     <tr key={`admin-${item.id}`} className="hover:bg-slate-50">
                       <td className="px-4 py-3">
                         <div className="font-bold text-[#1F2A63]">{item.location_name}</div>
@@ -507,7 +625,7 @@ export default function SchedulePage() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  Registration / Info Link
+                  Registration / Info Link (Optional)
                 </label>
                 <input
                   type="url"
