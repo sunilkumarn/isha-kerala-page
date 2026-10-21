@@ -317,74 +317,10 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        {/* Filters Toolbar */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-black/10 shadow-sm space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Filter By:</span>
-
-            <select
-              value={filterLocation}
-              onChange={(e) => setFilterLocation(e.target.value)}
-              className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
-            >
-              <option value="">All Locations</option>
-              {availableLocations.map((loc) => (
-                <option key={loc} value={loc}>
-                  {loc}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={filterProgram}
-              onChange={(e) => setFilterProgram(e.target.value)}
-              className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
-            >
-              <option value="">All Programs</option>
-              {availablePrograms.map((prog) => (
-                <option key={prog} value={prog}>
-                  {prog}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
-            >
-              <option value="">All Statuses</option>
-              <option value="confirmed">✅ Confirmed</option>
-              <option value="new_or_changed">🌦️ Newly added/changed</option>
-              <option value="ishanga_pending">❓ Ishanga pending</option>
-              <option value="center_unconfirmed">‼️ Center unconfirmed</option>
-              <option value="hall_unfinalized">❕ Hall unfinalized</option>
-              <option value="cancelled">❌ Cancelled</option>
-            </select>
-          </div>
-
-          {/* Date Range Filters */}
-          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-semibold">From:</span>
-              <input
-                type="date"
-                value={startDateFrom}
-                onChange={(e) => setStartDateFrom(e.target.value)}
-                className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
-              />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-semibold">To:</span>
-              <input
-                type="date"
-                value={startDateTo}
-                onChange={(e) => setStartDateTo(e.target.value)}
-                className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
-              />
-            </div>
-
+        {/* Filters Toolbar - Clean Uniform Grid Alignment */}
+        <div className="bg-white p-5 rounded-2xl border border-black/10 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Filter Programs</span>
             {(filterLocation || filterProgram || filterStatus || startDateFrom || startDateTo) && (
               <button
                 onClick={() => {
@@ -394,11 +330,78 @@ export default function SchedulePage() {
                   setStartDateFrom("");
                   setStartDateTo("");
                 }}
-                className="text-xs font-semibold text-rose-600 hover:underline ml-auto"
+                className="text-xs font-semibold text-rose-600 hover:underline"
               >
                 Reset All Filters
               </button>
             )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            {/* Location Filter */}
+            <select
+              value={filterLocation}
+              onChange={(e) => setFilterLocation(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+            >
+              <option value="">All Locations</option>
+              {availableLocations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+
+            {/* Program Filter */}
+            <select
+              value={filterProgram}
+              onChange={(e) => setFilterProgram(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+            >
+              <option value="">All Programs</option>
+              {availablePrograms.map((prog) => (
+                <option key={prog} value={prog}>
+                  {prog}
+                </option>
+              ))}
+            </select>
+
+            {/* Status Filter */}
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+            >
+              <option value="">All Statuses</option>
+              <option value="confirmed">✅ Confirmed</option>
+              <option value="new_or_changed">🌦️ Newly added/changed</option>
+              <option value="ishanga_pending">❓ Ishanga pending</option>
+              <option value="center_unconfirmed">‼️ Center unconfirmed</option>
+              <option value="hall_unfinalized">❕ Hall unfinalized</option>
+              <option value="cancelled">❌ Cancelled</option>
+            </select>
+
+            {/* From Date Filter */}
+            <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2">
+              <span className="text-[11px] font-bold text-slate-500 uppercase">From:</span>
+              <input
+                type="date"
+                value={startDateFrom}
+                onChange={(e) => setStartDateFrom(e.target.value)}
+                className="w-full text-xs font-medium text-slate-700 bg-transparent focus:outline-none"
+              />
+            </div>
+
+            {/* To Date Filter */}
+            <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2">
+              <span className="text-[11px] font-bold text-slate-500 uppercase">To:</span>
+              <input
+                type="date"
+                value={startDateTo}
+                onChange={(e) => setStartDateTo(e.target.value)}
+                className="w-full text-xs font-medium text-slate-700 bg-transparent focus:outline-none"
+              />
+            </div>
           </div>
         </div>
 
