@@ -48,7 +48,7 @@ const STATUS_CONFIG: Record<
 
 const INITIAL_FORM: Partial<InternalScheduleItem> = {
   location_name: "",
-  program_name: "IEP Malayalam in-person",
+  program_name: "", // Starts blank for new entries
   start_date: "",
   end_date: "",
   link_url: "",
