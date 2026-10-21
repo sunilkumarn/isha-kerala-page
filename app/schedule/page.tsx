@@ -118,7 +118,7 @@ export default function SchedulePage() {
     const { data, error } = await supabase
       .from("internal_schedules")
       .select("*")
-      .gte("start_date", todayStr)
+      .gte("start_date", todayStr) // Only upcoming programs
       .order("start_date", { ascending: true })
       .order("sort_order", { ascending: true });
 
@@ -272,13 +272,25 @@ export default function SchedulePage() {
   return (
     <div className="min-h-screen bg-[#F7F6F2] py-8 px-4 sm:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Top Control Bar */}
+        {/* Top Control Bar - Option 1: Lotus Icon & Clean Pill Badge */}
         <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-black/10 shadow-sm">
-          <div>
-            <h1 className="text-2xl font-bold text-[#1F2A63]">Program Schedule Master</h1>
-            <p className="text-xs text-slate-500 mt-1">
-              {isAdmin ? "Admin Mode Active (kavitha@ishakerala.com)" : "Public View Schedule"}
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F28C18]/10 text-xl text-[#F28C18]">
+              🪷
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="bg-[#1F2A63]/10 text-[#1F2A63] text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+                  Isha Kerala
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#1F2A63] tracking-tight">
+                Program Schedule
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {isAdmin ? "Admin Mode Active (kavitha@ishakerala.com)" : "Public View Schedule"}
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
