@@ -561,7 +561,7 @@ export default function SchedulePage() {
                   placeholder="e.g. WAYANAD or ???"
                   value={formData.location_name || ""}
                   onChange={(e) => setFormData({ ...formData, location_name: e.target.value })}
-                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
+                  className="w-full rounded-xl border border-slate-300 bg-white text-slate-800 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
                 />
                 <datalist id="locations-list">
                   {availableLocations.map((loc) => (
@@ -582,7 +582,7 @@ export default function SchedulePage() {
                   placeholder="e.g. IEP Malayalam in-person"
                   value={formData.program_name || ""}
                   onChange={(e) => setFormData({ ...formData, program_name: e.target.value })}
-                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
+                  className="w-full rounded-xl border border-slate-300 bg-white text-slate-800 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
                 />
                 <datalist id="programs-list">
                   {availablePrograms.map((prog) => (
@@ -601,7 +601,7 @@ export default function SchedulePage() {
                     required
                     value={formData.start_date || ""}
                     onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                    className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
+                    className="w-full rounded-xl border border-slate-300 bg-white text-slate-800 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
                   />
                 </div>
                 <div>
@@ -612,7 +612,7 @@ export default function SchedulePage() {
                     type="date"
                     value={formData.end_date || ""}
                     onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                    className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
+                    className="w-full rounded-xl border border-slate-300 bg-white text-slate-800 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
                   />
                 </div>
               </div>
@@ -630,7 +630,7 @@ export default function SchedulePage() {
                         status: e.target.value as InternalScheduleItem["status"],
                       })
                     }
-                    className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
+                    className="w-full rounded-xl border border-slate-300 bg-white text-slate-800 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
                   >
                     <option value="confirmed">✅ Confirmed</option>
                     <option value="new_or_changed">🌦️ Newly added/changed</option>
@@ -649,7 +649,7 @@ export default function SchedulePage() {
                     type="text"
                     value={formData.emoji_prefix || "🌊"}
                     onChange={(e) => setFormData({ ...formData, emoji_prefix: e.target.value })}
-                    className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
+                    className="w-full rounded-xl border border-slate-300 bg-white text-slate-800 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
                   />
                 </div>
               </div>
@@ -663,7 +663,7 @@ export default function SchedulePage() {
                   placeholder="https://isha.co/Wayanad"
                   value={formData.link_url || ""}
                   onChange={(e) => setFormData({ ...formData, link_url: e.target.value })}
-                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
+                  className="w-full rounded-xl border border-slate-300 bg-white text-slate-800 px-3.5 py-2 text-sm focus:border-[#1F2A63] focus:outline-none"
                 />
               </div>
 
