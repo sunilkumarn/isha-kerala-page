@@ -49,7 +49,7 @@ export default async function HomeLandingPage() {
       imageUrl: getGeneralImageUrl("connect.jpeg"),
       imageAlt: "Connect with Center - Isha Kerala",
       buttonClass:
-        "border border-[#1F2A63]/20 bg-[#F7F6F2] text-[#1F2A63] hover:bg-[#1F2A63]/5 focus:ring-[#1F2A63]/30",
+        "bg-[#F28C18] text-white hover:brightness-95 focus:ring-[#F28C18]/50",
     },
   ];
 
