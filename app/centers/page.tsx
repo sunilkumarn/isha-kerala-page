@@ -25,17 +25,21 @@ export default async function CentersCitiesPage() {
   // 1. Fetching tables independently with parallel requests for safety and speed
   const [citiesResponse, contactsResponse] = await Promise.all([
     supabase.from("cities").select("id, name, image_url, slug").order("name"),
-    supabase.from("contacts").select("city_id, phone, email, is_center_specific")
+    supabase.from("contacts").select("city_id, phone, email, is_center_specific"),
   ]);
 
-  const errorMessage = citiesResponse.error?.message ?? contactsResponse.error?.message ?? null;
+  const errorMessage =
+    citiesResponse.error?.message ?? contactsResponse.error?.message ?? null;
 
   const cityRows = (citiesResponse.data ?? []) as CityRow[];
   const contactRows = (contactsResponse.data ?? []) as ContactRow[];
 
   // 2. Map contacts by their city_id ONLY when marked center-specific
-  const centerContactMap = new Map<string | number, { phone: string | null; email: string | null }>();
-  
+  const centerContactMap = new Map<
+    string | number,
+    { phone: string | null; email: string | null }
+  >();
+
   contactRows.forEach((contact) => {
     if (contact.city_id) {
       // STRICT GATEKEEPER: Only map the row if it's explicitly center specific.
@@ -56,7 +60,7 @@ export default async function CentersCitiesPage() {
     const cityName = city.name?.trim() || "Other";
     const dbSlug = city.slug?.trim() || "";
     const slug = dbSlug || slugify(cityName);
-    
+
     // Attempt to pull a true-flagged center contact from our lookup map
     const matchedCenterContact = centerContactMap.get(city.id);
 
@@ -65,9 +69,9 @@ export default async function CentersCitiesPage() {
       cityName,
       slug,
       imageUrl: city.image_url ?? null,
-      updatedAt: null, 
+      updatedAt: null,
       // If a matched center-specific contact exists, render it. Otherwise, pass null so the card remains blank!
-      contact: matchedCenterContact ? matchedCenterContact.phone : null, 
+      contact: matchedCenterContact ? matchedCenterContact.phone : null,
       email: matchedCenterContact ? matchedCenterContact.email : null,
     };
   });
@@ -75,12 +79,19 @@ export default async function CentersCitiesPage() {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-[#F7F4EE]">
       <main className="flex-1">
-        <header className="bg-indigo-950 text-white">
-          <div className="mx-auto max-w-6xl px-6 py-14 text-center">
-            <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
+        <header
+          className="bg-[#1F2A63] bg-cover bg-center bg-no-repeat text-white"
+          style={{ backgroundImage: "url('/sadhguru.jpg')" }}
+        >
+          <div className="mx-auto max-w-5xl px-6 py-12 text-center sm:py-16">
+            <p className="mx-auto max-w-xl text-sm text-white/85 sm:text-base">
+              Welcome to Isha Kerala
+            </p>
+            <div className="mx-auto mt-2.5 h-0.5 w-12 rounded-full bg-[#F28C18]" />
+            <h1 className="mt-3.5 text-2xl font-semibold tracking-tight text-white sm:text-4xl">
               All Centers
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-sm text-white/80 md:text-base">
+            <p className="mx-auto mt-2.5 max-w-xl text-sm text-white/85 sm:text-base">
               Select your city to explore upcoming sessions
             </p>
           </div>
