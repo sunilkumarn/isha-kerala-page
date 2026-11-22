@@ -3,6 +3,7 @@ import { getPublicProgramsFromPublishedSessions } from "@/lib/public-programs";
 import PublicFooter from "@/components/public/PublicFooter";
 import NeedAssistanceSection from "@/components/public/NeedAssistanceSection";
 import ProgramsGridWithPagination from "@/components/public/ProgramsGridWithPagination";
+import FirstSevenDaysSlideshow from "@/components/public/FirstSevenDaysSlideshow";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -51,25 +52,29 @@ export default async function ProgramsPage() {
           style={{ backgroundImage: "url('/sadhguru.jpg')" }}
         >
           <div className="mx-auto max-w-6xl px-6 py-16 text-center">
-            <h3 className="mx-auto mt-6 max-w-2xl text-lg text-white/80">
-              Welcome to Isha kerala
+            <h3 className="mx-auto mt-6 max-w-2xl text-lg font-normal tracking-normal text-white/80">
+              Welcome to Isha Kerala
             </h3>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
             <br />
-            <h3 className="text-2xl tracking-tight text-white sm:text-5xl">
+            <h1 className="text-2xl font-medium tracking-normal text-white sm:text-5xl">
               Upcoming Programs
-            </h3>
+            </h1>
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-6 py-12">
+        <section className="mx-auto max-w-6xl space-y-10 px-6 py-12">
+          <FirstSevenDaysSlideshow fallbackPrograms={programs} />
+
           {errorMessage ? (
             <div className="rounded-xl border border-red-200 bg-white p-6 text-sm text-red-700">
               Failed to load programs: {errorMessage}
             </div>
           ) : programs.length === 0 ? (
             <div className="rounded-2xl border border-black/5 bg-white p-10 text-center">
-              <h2 className="text-xl font-medium">No programs yet</h2>
+              <h2 className="text-xl font-medium tracking-normal">
+                No programs yet
+              </h2>
               <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600">
                 Please check back later. We’ll publish new programs here as soon as
                 they’re available.
@@ -107,7 +112,7 @@ export default async function ProgramsPage() {
               </svg>
             </div>
 
-            <h2 className="mt-7 text-3xl tracking-tight text-slate-900 sm:text-4xl">
+            <h2 className="mt-7 text-3xl font-medium tracking-normal text-slate-900 sm:text-4xl">
               Looking for a Center Near You?
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base">
