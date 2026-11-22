@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Suspense } from "react";
 import { Poppins } from "next/font/google";
-// @ts-expect-error Next.js loads this global stylesheet at runtime.
 import "./globals.css";
 import GoogleAnalytics from "../components/GoogleAnalytics";
 import PublicHeader from "@/components/public/PublicHeader";
