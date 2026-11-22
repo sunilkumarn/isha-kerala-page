@@ -15,7 +15,7 @@ export default function PublicHeader() {
     <header className="sticky top-0 z-50 h-16 border-b border-black/5 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
         <Link
-          href="/programs"
+          href="/"
           className="inline-flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/40 focus:ring-offset-2"
           aria-label="Isha Kerala home"
         >

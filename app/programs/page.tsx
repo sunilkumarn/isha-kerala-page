@@ -59,14 +59,6 @@ export default async function ProgramsPage() {
             <h3 className="text-2xl tracking-tight text-white sm:text-5xl">
               Upcoming Programs
             </h3>
-            <div className="mt-8">
-              <Link
-                href="/volunteering/kerala"
-                className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/15 px-7 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-[#F28C18]"
-              >
-                Volunteering Opportunities
-              </Link>
-            </div>
           </div>
         </section>
 
@@ -123,18 +115,12 @@ export default async function ProgramsPage() {
               to you.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-8">
               <Link
                 href="/centers"
                 className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-8 py-3 text-sm font-medium text-white shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/50 focus:ring-offset-2"
               >
                 View All Centers
-              </Link>
-              <Link
-                href="/volunteering/kerala"
-                className="inline-flex items-center justify-center rounded-full border border-[#1F2A63]/20 bg-[#F7F6F2] px-8 py-3 text-sm font-medium text-[#1F2A63] transition hover:bg-[#1F2A63]/5 focus:outline-none focus:ring-2 focus:ring-[#1F2A63]/40 focus:ring-offset-2"
-              >
-                Volunteering Opportunities
               </Link>
             </div>
           </div>
