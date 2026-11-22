@@ -19,17 +19,6 @@ export default async function HomeLandingPage() {
 
   const LANDING_BLOCKS = [
     {
-      title: "Volunteering Opportunity",
-      description:
-        "Become an active part of bringing inner wellbeing to Kerala. Express your interest to support upcoming programs and local center activities.",
-      ctaLabel: "Express Interest",
-      href: "/volunteering/kerala",
-      imageUrl: getGeneralImageUrl("vol.jpg"),
-      imageAlt: "Volunteering Opportunity - Isha Kerala",
-      buttonClass:
-        "bg-[#F28C18] text-white hover:brightness-95 focus:ring-[#F28C18]/50",
-    },
-    {
       title: "Upcoming Programs",
       description:
         "Discover Inner Engineering, Hatha Yoga, and other upcoming Isha programs scheduled across cities and centers in Kerala.",
@@ -37,6 +26,17 @@ export default async function HomeLandingPage() {
       href: "/programs",
       imageUrl: getGeneralImageUrl("programs.jpeg"),
       imageAlt: "Upcoming Programs - Isha Kerala",
+      buttonClass:
+        "bg-[#F28C18] text-white hover:brightness-95 focus:ring-[#F28C18]/50",
+    },
+    {
+      title: "Volunteering Opportunity",
+      description:
+        "Become an active part of bringing inner wellbeing to Kerala. Express your interest to support upcoming programs and local center activities.",
+      ctaLabel: "Express Interest",
+      href: "/volunteering/kerala",
+      imageUrl: getGeneralImageUrl("vol.jpg"),
+      imageAlt: "Volunteering Opportunity - Isha Kerala",
       buttonClass:
         "bg-[#1F2A63] text-white hover:brightness-110 focus:ring-[#1F2A63]/40",
     },
@@ -71,7 +71,7 @@ export default async function HomeLandingPage() {
               Your journey with Isha can begin in many ways
             </h1>
 
-            <p className="mx-auto mt-2.5 max-w-2xl text-xs italic font-medium leading-relaxed text-[#F28C18] sm:text-sm">
+            <p className="mx-auto mt-2.5 max-w-2xl text-xs italic font-medium leading-relaxed text-white/90 sm:text-sm">
               Explore upcoming programs, discover volunteering opportunities, and
               connect with an Isha center near you across Kerala
             </p>
