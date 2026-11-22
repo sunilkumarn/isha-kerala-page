@@ -48,7 +48,7 @@ const STATUS_CONFIG: Record<
 
 const INITIAL_FORM: Partial<InternalScheduleItem> = {
   location_name: "",
-  program_name: "", // Starts blank for new entries
+  program_name: "",
   start_date: "",
   end_date: "",
   link_url: "",
@@ -118,7 +118,7 @@ export default function SchedulePage() {
     const { data, error } = await supabase
       .from("internal_schedules")
       .select("*")
-      .gte("start_date", todayStr) // Only upcoming programs
+      .gte("start_date", todayStr)
       .order("start_date", { ascending: true })
       .order("sort_order", { ascending: true });
 
@@ -270,34 +270,48 @@ export default function SchedulePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F6F2] py-8 px-4 sm:px-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Top Control Bar */}
+    <div className="min-h-screen bg-[#F7F6F2] text-slate-900">
+      {/* Hero Header Banner */}
+      <section
+        className="bg-[#1F2A63] bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/sadhguru.jpg')" }}
+      >
+        <div className="mx-auto max-w-5xl px-6 py-12 text-center sm:py-16">
+          <p className="mx-auto max-w-xl text-sm text-white/85 sm:text-base">
+            Isha Kerala
+          </p>
+          <div className="mx-auto mt-2.5 h-0.5 w-12 rounded-full bg-[#F28C18]" />
+
+          <h1 className="mt-3.5 text-xl font-medium tracking-normal text-white sm:text-3xl">
+            Program Schedule
+          </h1>
+
+          <p className="mx-auto mt-2.5 max-w-2xl text-xs italic font-medium leading-relaxed text-white/90 sm:text-sm">
+            Explore upcoming yoga and meditation programs scheduled across Kerala
+          </p>
+        </div>
+      </section>
+
+      <div className="max-w-6xl mx-auto py-8 px-4 sm:px-8 space-y-6">
+        {/* Action Bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-black/10 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F28C18]/10 text-xl text-[#F28C18]">
-              🪷
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="bg-[#1F2A63]/10 text-[#1F2A63] text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
-                  Isha Kerala
-                </span>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[#1F2A63] tracking-tight">
-                Program Schedule
-              </h1>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {isAdmin ? "Admin Mode Active (kavitha@ishakerala.com)" : "Public View Schedule"}
-              </p>
-            </div>
+          <div>
+            <span className="inline-block bg-[#1F2A63]/10 text-[#1F2A63] text-[10px] font-semibold uppercase tracking-normal px-2.5 py-0.5 rounded-full">
+              Isha Kerala
+            </span>
+            <h2 className="mt-1.5 text-lg sm:text-xl font-medium text-[#1F2A63] tracking-normal">
+              Upcoming Program Schedule
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {isAdmin ? "Admin Mode Active (kavitha@ishakerala.com)" : "Public View Schedule"}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             {isAdmin && (
               <button
                 onClick={handleOpenCreateModal}
-                className="inline-flex items-center gap-2 rounded-full bg-[#1F2A63] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#161e47]"
+                className="inline-flex items-center gap-2 rounded-full bg-[#1F2A63] px-5 py-2.5 text-xs font-medium text-white shadow-xs transition hover:bg-[#161e47]"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -308,7 +322,7 @@ export default function SchedulePage() {
 
             <button
               onClick={handleCopyWhatsapp}
-              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-xs font-medium text-white shadow-xs transition hover:bg-emerald-700"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
@@ -319,7 +333,7 @@ export default function SchedulePage() {
             <button
               onClick={handleDownloadPDF}
               disabled={isGeneratingPdf}
-              className="inline-flex items-center gap-2 rounded-full bg-[#F28C18] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:brightness-95 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-[#F28C18] px-5 py-2.5 text-xs font-medium text-white shadow-xs transition hover:brightness-95 disabled:opacity-50"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -332,7 +346,7 @@ export default function SchedulePage() {
         {/* Filters Toolbar */}
         <div className="bg-white p-5 rounded-2xl border border-black/10 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Filter Programs</span>
+            <span className="text-xs font-semibold text-slate-700 uppercase tracking-normal">Filter Programs</span>
             {(filterLocation || filterProgram || filterStatus || startDateFrom || startDateTo) && (
               <button
                 onClick={() => {
@@ -342,7 +356,7 @@ export default function SchedulePage() {
                   setStartDateFrom("");
                   setStartDateTo("");
                 }}
-                className="text-xs font-semibold text-rose-600 hover:underline"
+                className="text-xs font-medium text-rose-600 hover:underline"
               >
                 Reset All Filters
               </button>
@@ -353,7 +367,7 @@ export default function SchedulePage() {
             <select
               value={filterLocation}
               onChange={(e) => setFilterLocation(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-normal text-slate-700 focus:border-[#1F2A63] focus:outline-none"
             >
               <option value="">All Locations</option>
               {availableLocations.map((loc) => (
@@ -366,7 +380,7 @@ export default function SchedulePage() {
             <select
               value={filterProgram}
               onChange={(e) => setFilterProgram(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-normal text-slate-700 focus:border-[#1F2A63] focus:outline-none"
             >
               <option value="">All Programs</option>
               {availablePrograms.map((prog) => (
@@ -379,7 +393,7 @@ export default function SchedulePage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 focus:border-[#1F2A63] focus:outline-none"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-normal text-slate-700 focus:border-[#1F2A63] focus:outline-none"
             >
               <option value="">All Statuses</option>
               <option value="confirmed">✅ Confirmed</option>
@@ -391,22 +405,22 @@ export default function SchedulePage() {
             </select>
 
             <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2">
-              <span className="text-[11px] font-bold text-slate-500 uppercase">From:</span>
+              <span className="text-[11px] font-medium text-slate-500 uppercase">From:</span>
               <input
                 type="date"
                 value={startDateFrom}
                 onChange={(e) => setStartDateFrom(e.target.value)}
-                className="w-full text-xs font-medium text-slate-700 bg-transparent focus:outline-none"
+                className="w-full text-xs font-normal text-slate-700 bg-transparent focus:outline-none"
               />
             </div>
 
             <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2">
-              <span className="text-[11px] font-bold text-slate-500 uppercase">To:</span>
+              <span className="text-[11px] font-medium text-slate-500 uppercase">To:</span>
               <input
                 type="date"
                 value={startDateTo}
                 onChange={(e) => setStartDateTo(e.target.value)}
-                className="w-full text-xs font-medium text-slate-700 bg-transparent focus:outline-none"
+                className="w-full text-xs font-normal text-slate-700 bg-transparent focus:outline-none"
               />
             </div>
           </div>
@@ -415,8 +429,8 @@ export default function SchedulePage() {
         {/* Schedule Table Container */}
         <div ref={pdfContainerRef} className="bg-[#F7F6F2] p-6 rounded-3xl">
           <div className="text-center pb-6 border-b-2 border-[#F28C18] mb-6">
-            <h1 className="text-2xl font-bold text-[#1F2A63]">ISHA KERALA PROGRAMS</h1>
-            <p className="text-xs font-semibold text-[#F28C18] uppercase tracking-wider mt-1">
+            <h2 className="text-2xl font-medium text-[#1F2A63] tracking-normal">ISHA KERALA PROGRAMS</h2>
+            <p className="text-xs font-medium text-[#F28C18] uppercase tracking-normal mt-1">
               Upcoming Program Schedule
             </p>
           </div>
@@ -434,7 +448,7 @@ export default function SchedulePage() {
                   <col className="w-[34%]" />
                   <col className="w-[28%]" />
                 </colgroup>
-                <thead className="bg-slate-100 text-slate-900 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
+                <thead className="bg-slate-100 text-slate-900 uppercase text-[11px] font-semibold tracking-normal border-b border-slate-200">
                   <tr>
                     <th className="px-5 py-3.5">Dates</th>
                     <th className="px-5 py-3.5">Location</th>
@@ -448,10 +462,10 @@ export default function SchedulePage() {
 
                     return (
                       <tr key={item.id} className="hover:bg-slate-50 transition">
-                        <td className="px-5 py-4 whitespace-nowrap font-medium text-slate-900 text-xs">
+                        <td className="px-5 py-4 whitespace-nowrap font-normal text-slate-900 text-xs">
                           {item.emoji_prefix} {formatDateRange(item.start_date, item.end_date)}
                         </td>
-                        <td className="px-5 py-4 font-bold text-[#1F2A63] text-sm truncate">
+                        <td className="px-5 py-4 font-medium text-[#1F2A63] text-sm truncate">
                           {item.location_name}
                         </td>
                         <td className="px-5 py-4 font-normal text-slate-800 text-sm">
@@ -470,7 +484,7 @@ export default function SchedulePage() {
                           )}
                         </td>
                         <td className="px-5 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${statusConfig.badgeClass}`}>
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig.badgeClass}`}>
                             <span>{statusConfig.icon}</span>
                             <span>{statusConfig.label}</span>
                           </span>
@@ -487,7 +501,7 @@ export default function SchedulePage() {
         {/* Admin Management Controls */}
         {isAdmin && (
           <div className="bg-white p-6 rounded-2xl border border-black/10 shadow-sm">
-            <h2 className="text-sm font-bold text-[#1F2A63] uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-semibold text-[#1F2A63] uppercase tracking-normal mb-4">
               Admin Management Controls ({filteredSchedules.length} Filtered Entries)
             </h2>
             <div className="rounded-xl border border-slate-200 overflow-x-auto">
@@ -504,7 +518,7 @@ export default function SchedulePage() {
                   {filteredSchedules.map((item) => (
                     <tr key={`admin-${item.id}`} className="hover:bg-slate-50">
                       <td className="px-4 py-3">
-                        <div className="font-bold text-[#1F2A63]">{item.location_name}</div>
+                        <div className="font-medium text-[#1F2A63]">{item.location_name}</div>
                         <div className="text-slate-600">{item.program_name}</div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">{item.start_date}</td>
@@ -512,13 +526,13 @@ export default function SchedulePage() {
                       <td className="px-4 py-3 whitespace-nowrap text-right space-x-2">
                         <button
                           onClick={() => handleOpenEditModal(item)}
-                          className="font-semibold text-slate-600 hover:text-[#1F2A63] bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded transition"
+                          className="font-medium text-slate-600 hover:text-[#1F2A63] bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded transition"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(item.id, item.location_name)}
-                          className="font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1 rounded transition"
+                          className="font-medium text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1 rounded transition"
                         >
                           Delete
                         </button>
@@ -537,12 +551,12 @@ export default function SchedulePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-xl max-w-lg w-full p-6 space-y-6">
             <div className="flex items-center justify-between border-b pb-4">
-              <h3 className="text-lg font-bold text-[#1F2A63]">
+              <h3 className="text-lg font-medium text-[#1F2A63]">
                 {editingId ? "Edit Schedule Entry" : "Add New Schedule Entry"}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 font-bold text-lg"
+                className="text-slate-400 hover:text-slate-600 font-medium text-lg"
               >
                 ✕
               </button>
@@ -551,7 +565,7 @@ export default function SchedulePage() {
             <form onSubmit={handleSave} className="space-y-4">
               {/* Location Name with Autocomplete */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-slate-700 uppercase mb-1">
                   Location Name *
                 </label>
                 <input
@@ -572,7 +586,7 @@ export default function SchedulePage() {
 
               {/* Program Name with Autocomplete */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-slate-700 uppercase mb-1">
                   Program Name *
                 </label>
                 <input
@@ -593,7 +607,7 @@ export default function SchedulePage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-medium text-slate-700 uppercase mb-1">
                     Start Date *
                   </label>
                   <input
@@ -605,7 +619,7 @@ export default function SchedulePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-medium text-slate-700 uppercase mb-1">
                     End Date
                   </label>
                   <input
@@ -619,7 +633,7 @@ export default function SchedulePage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-medium text-slate-700 uppercase mb-1">
                     Status
                   </label>
                   <select
@@ -642,7 +656,7 @@ export default function SchedulePage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-medium text-slate-700 uppercase mb-1">
                     Emoji Prefix
                   </label>
                   <input
@@ -655,7 +669,7 @@ export default function SchedulePage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-slate-700 uppercase mb-1">
                   Registration / Info Link (Optional)
                 </label>
                 <input
@@ -671,14 +685,14 @@ export default function SchedulePage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-full border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  className="px-5 py-2.5 rounded-full border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-5 py-2.5 rounded-full bg-[#1F2A63] text-xs font-semibold text-white hover:bg-[#161e47] disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-full bg-[#1F2A63] text-xs font-medium text-white hover:bg-[#161e47] disabled:opacity-50"
                 >
                   {isSaving ? "Saving..." : "Save Entry"}
                 </button>
