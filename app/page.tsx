@@ -67,16 +67,13 @@ export default async function HomeLandingPage() {
             </p>
             <div className="mx-auto mt-2.5 h-0.5 w-12 rounded-full bg-[#F28C18]" />
 
-            <h1 className="mt-3.5 text-xl tracking-tight text-white sm:text-3xl">
-              Participate, Explore &amp; Connect
+            <h1 className="mt-3.5 text-xl font-medium tracking-normal text-white sm:text-3xl">
+              Your journey with Isha can begin in many ways
             </h1>
 
-            <p className="mx-auto mt-2.5 max-w-xl text-sm font-medium text-white/95 sm:text-base">
-              There&rsquo;s always a way to be involved.
-            </p>
-            <p className="mx-auto mt-1 max-w-xl text-[11px] leading-relaxed text-white/80 sm:text-xs">
+            <p className="mx-auto mt-2.5 max-w-2xl text-xs italic font-medium leading-relaxed text-[#F28C18] sm:text-sm">
               Explore upcoming programs, discover volunteering opportunities, and
-              connect with an Isha center near you across Kerala.
+              connect with an Isha center near you across Kerala
             </p>
           </div>
         </section>
@@ -90,16 +87,16 @@ export default async function HomeLandingPage() {
                 className="flex flex-col justify-between overflow-hidden rounded-3xl border border-black/5 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div>
-                  <div className="flex h-48 w-full items-center justify-center overflow-hidden bg-[#FAF8F4] p-3">
+                  <div className="aspect-[4/3] w-full overflow-hidden">
                     <img
                       src={block.imageUrl}
                       alt={block.imageAlt}
-                      className="max-h-full max-w-full object-contain transition duration-300 hover:scale-105"
+                      className="h-full w-full object-cover transition duration-300 hover:scale-105"
                     />
                   </div>
 
                   <div className="p-7 pb-0 text-center">
-                    <h2 className="text-2xl tracking-tight text-slate-900">
+                    <h2 className="text-2xl font-medium tracking-normal text-slate-900">
                       {block.title}
                     </h2>
 
