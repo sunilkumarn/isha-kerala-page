@@ -44,18 +44,29 @@ export default async function ProgramsPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-[#F7F6F2]  text-slate-900">
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-[#F7F6F2] text-slate-900">
       <main className="flex-1">
-        <section className="bg-[#1F2A63] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/sadhguru.jpg')" }}>
+        <section
+          className="bg-[#1F2A63] bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/sadhguru.jpg')" }}
+        >
           <div className="mx-auto max-w-6xl px-6 py-16 text-center">
-            <h3 className="mx-auto mt-6 max-w-2xl text-lg text-white/80 ">
+            <h3 className="mx-auto mt-6 max-w-2xl text-lg text-white/80">
               Welcome to Isha kerala
             </h3>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
-            <br></br>
+            <br />
             <h3 className="text-2xl tracking-tight text-white sm:text-5xl">
               Upcoming Programs
             </h3>
+            <div className="mt-8">
+              <Link
+                href="/volunteering/kerala"
+                className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/15 px-7 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-[#F28C18]"
+              >
+                Volunteering Opportunities
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -83,7 +94,7 @@ export default async function ProgramsPage() {
 
         <section className="mx-auto max-w-6xl px-6 pb-16 sm:pb-20">
           <div className="rounded-3xl border border-black/5 bg-white px-6 py-12 text-center shadow-sm sm:px-10 sm:py-14">
-            <div className="mx-auto bg-green-300 flex h-14 w-14 items-center justify-center rounded-full">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-300">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -112,12 +123,18 @@ export default async function ProgramsPage() {
               to you.
             </p>
 
-            <div className="mt-8">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/centers"
                 className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-8 py-3 text-sm font-medium text-white shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#F28C18]/50 focus:ring-offset-2"
               >
                 View All Centers
+              </Link>
+              <Link
+                href="/volunteering/kerala"
+                className="inline-flex items-center justify-center rounded-full border border-[#1F2A63]/20 bg-[#F7F6F2] px-8 py-3 text-sm font-medium text-[#1F2A63] transition hover:bg-[#1F2A63]/5 focus:outline-none focus:ring-2 focus:ring-[#1F2A63]/40 focus:ring-offset-2"
+              >
+                Volunteering Opportunities
               </Link>
             </div>
           </div>
@@ -130,5 +147,3 @@ export default async function ProgramsPage() {
     </div>
   );
 }
-
-

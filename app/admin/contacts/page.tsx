@@ -32,6 +32,7 @@ function ContactsPageInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const pageParam = searchParams.get("page");
+  const cityParam = searchParams.get("city") || "all";
   const page = Math.max(1, Math.floor(Number(pageParam ?? "1") || 1));
 
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -51,16 +52,32 @@ function ContactsPageInner() {
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
-  const setPage = (nextPage: number) => {
+  const updateQueryParams = (nextPage: number, nextCity: string) => {
     const safeNextPage = Math.max(1, Math.floor(nextPage));
     const params = new URLSearchParams(searchParams.toString());
+
     if (safeNextPage <= 1) {
       params.delete("page");
     } else {
       params.set("page", String(safeNextPage));
     }
+
+    if (!nextCity || nextCity === "all") {
+      params.delete("city");
+    } else {
+      params.set("city", nextCity);
+    }
+
     const queryString = params.toString();
     router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  };
+
+  const setPage = (nextPage: number) => {
+    updateQueryParams(nextPage, cityParam);
+  };
+
+  const setCityFilter = (nextCity: string) => {
+    updateQueryParams(1, nextCity);
   };
 
   const fetchContacts = async () => {
@@ -68,9 +85,15 @@ function ContactsPageInner() {
     const from = (page - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
 
-    const { data, error, count } = await supabase
+    let query = supabase
       .from("contacts")
-      .select("*, cities(name)", { count: "exact" })
+      .select("*, cities(name)", { count: "exact" });
+
+    if (cityParam !== "all") {
+      query = query.eq("city_id", cityParam);
+    }
+
+    const { data, error, count } = await query
       .order("name")
       .range(from, to);
 
@@ -108,7 +131,7 @@ function ContactsPageInner() {
 
   useEffect(() => {
     fetchContacts();
-  }, [page]);
+  }, [page, cityParam]);
 
   useEffect(() => {
     fetchCities();
@@ -221,15 +244,42 @@ function ContactsPageInner() {
       </header>
 
       <section className="rounded-lg border border-[#E2DED3] bg-white">
-        <div className="border-b border-[#E2DED3] px-6 py-4 text-sm font-medium text-[#8C7A5B]">
-          Contact List
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2DED3] px-6 py-4">
+          <span className="text-sm font-medium text-[#8C7A5B]">
+            Contact List
+          </span>
+
+          <div className="flex items-center gap-2.5">
+            <label
+              htmlFor="city-filter"
+              className="text-xs font-medium uppercase tracking-[0.15em] text-[#8C7A5B]"
+            >
+              City
+            </label>
+            <select
+              id="city-filter"
+              value={cityParam}
+              onChange={(e) => setCityFilter(e.target.value)}
+              className="rounded-md border border-[#E2DED3] bg-[#FAF8F4] px-3 py-1.5 text-sm text-[#2B2B2B] focus:border-[#6B5E4A] focus:outline-none"
+            >
+              <option value="all">All Cities</option>
+              {cities.map((city) => (
+                <option key={city.id} value={String(city.id)}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
+
         <div className="px-6 py-5">
           {isLoading ? (
             <p className="text-sm text-[#8C7A5B]">Loading contacts...</p>
           ) : contacts.length === 0 ? (
             <p className="text-sm text-[#8C7A5B]">
-              No contacts yet. Add the first one.
+              {cityParam !== "all"
+                ? "No contacts found for the selected city."
+                : "No contacts yet. Add the first one."}
             </p>
           ) : (
             <div className="overflow-x-auto">

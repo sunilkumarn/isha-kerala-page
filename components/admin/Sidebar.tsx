@@ -14,6 +14,7 @@ export default function Sidebar() {
   const isProgramsActive = pathname.startsWith("/admin/programs");
   const isVenuesActive = pathname.startsWith("/admin/venues");
   const isContactsActive = pathname.startsWith("/admin/contacts");
+  const isVolunteeringActive = pathname.startsWith("/admin/volunteering");
 
   const linkBase =
     "flex items-center gap-3 rounded-lg px-4 py-3 text-[16px] font-medium transition-colors";
@@ -99,6 +100,17 @@ export default function Sidebar() {
           <span className="h-2.5 w-2.5 rounded-full bg-[#6B5E4A]/60" />
           Contacts
         </Link>
+        <Link
+          href="/admin/volunteering"
+          className={`${linkBase} ${
+            isVolunteeringActive
+              ? "bg-white text-[#2B2B2B]"
+              : "text-[#8C7A5B] hover:bg-white/70 hover:text-[#2B2B2B]"
+          }`}
+        >
+          <span className="h-2.5 w-2.5 rounded-full bg-[#6B5E4A]/60" />
+          Volunteering Interest
+        </Link>
       </nav>
 
       <div className="mt-auto pt-8">
@@ -115,4 +127,3 @@ export default function Sidebar() {
     </aside>
   );
 }
-
