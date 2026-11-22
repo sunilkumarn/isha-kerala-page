@@ -41,13 +41,13 @@ export default async function HomeLandingPage() {
         "bg-[#1F2A63] text-white hover:brightness-110 focus:ring-[#1F2A63]/40",
     },
     {
-      title: "Connect with Your Center",
+      title: "Connect with Center",
       description:
         "Find your nearest local Isha center in Kerala, view center details, and stay connected with activities happening close to you.",
       ctaLabel: "Explore Centers",
       href: "/centers",
       imageUrl: getGeneralImageUrl("connect.jpeg"),
-      imageAlt: "Connect with Your Center - Isha Kerala",
+      imageAlt: "Connect with Center - Isha Kerala",
       buttonClass:
         "border border-[#1F2A63]/20 bg-[#F7F6F2] text-[#1F2A63] hover:bg-[#1F2A63]/5 focus:ring-[#1F2A63]/30",
     },
@@ -90,11 +90,11 @@ export default async function HomeLandingPage() {
                 className="flex flex-col justify-between overflow-hidden rounded-3xl border border-black/5 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div>
-                  <div className="h-48 w-full overflow-hidden bg-slate-100">
+                  <div className="flex h-48 w-full items-center justify-center overflow-hidden bg-[#FAF8F4] p-3">
                     <img
                       src={block.imageUrl}
                       alt={block.imageAlt}
-                      className="h-full w-full object-cover object-center transition duration-300 hover:scale-105"
+                      className="max-h-full max-w-full object-contain transition duration-300 hover:scale-105"
                     />
                   </div>
 

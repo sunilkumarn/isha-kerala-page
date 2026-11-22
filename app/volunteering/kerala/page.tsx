@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import PublicFooter from "@/components/public/PublicFooter";
 import VolunteeringInterestForm from "@/components/public/VolunteeringInterestForm";
@@ -39,29 +38,11 @@ export default async function KeralaVolunteeringPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#FAF4E8] text-[#2C251D]">
-      <header className="border-b border-[#2C251D]/10 bg-[#F3ECE0]">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <Link
-            href="/"
-            className="font-serif text-2xl font-bold italic tracking-tight text-[#2C251D]"
-          >
-            isha
-          </Link>
-
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5C5346] transition hover:text-[#2C251D]"
-          >
-            <span aria-hidden="true">&larr;</span> Back to Programs
-          </Link>
-        </div>
-      </header>
-
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-12 sm:py-16">
         <div className="text-center">
-          <h1 className="font-serif text-3xl font-bold leading-snug tracking-tight text-[#3A3228] sm:text-4xl">
-            Expression of Volunteering Interest - Kerala
-          </h1>
+          <h1 className="font-serif text-3xl font-bold leading-snug tracking-normal text-[#3A3228] sm:text-4xl">
+  Expression of Volunteering Interest - Kerala
+</h1>
 
           {/* Decorative Divider */}
           <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
