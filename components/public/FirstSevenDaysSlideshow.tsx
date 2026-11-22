@@ -307,7 +307,7 @@ export default function FirstSevenDaysSlideshow({
     >
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-medium tracking-normal text-[#1F2A63] sm:text-lg">
-          Starting in the Next 7 Days
+          Starting in 7 Days
         </h2>
 
         {slides.length > 1 && (
