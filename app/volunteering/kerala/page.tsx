@@ -29,6 +29,14 @@ export default async function KeralaVolunteeringPage() {
     name: c.name,
   }));
 
+  // Fetch public image URL from Supabase Storage
+  // Replace 'public-assets' and 'volunteering/banner.jpg' with your actual bucket and file path
+  const { data: bannerImageData } = supabase.storage
+    .from("General")
+    .getPublicUrl("/vol.jpg");
+
+  const bannerImageUrl = bannerImageData?.publicUrl || "/sadhguru.jpg";
+
   return (
     <div className="flex min-h-screen flex-col bg-[#FAF4E8] text-[#2C251D]">
       <header className="border-b border-[#2C251D]/10 bg-[#F3ECE0]">
@@ -55,38 +63,20 @@ export default async function KeralaVolunteeringPage() {
             Expression of Volunteering Interest - Kerala
           </h1>
 
-          <div className="mx-auto mt-5 flex justify-center">
-            <svg
-              viewBox="0 0 260 44"
-              fill="none"
-              aria-hidden="true"
-              className="h-9 w-56 text-[#2B3A8C]"
-            >
-              <path
-                d="M12 24 C32 24, 42 6, 50 24 C58 42, 68 8, 82 22 C96 34, 108 12, 124 22 C140 32, 154 14, 172 22 C190 28, 212 22, 248 23"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-              />
-              <path
-                d="M18 23 L244 23"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                opacity="0.75"
-              />
-            </svg>
-          </div>
+          {/* Decorative Divider */}
+          <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#F28C18]" />
         </div>
 
+        {/* Supabase Storage Image */}
         <div className="mt-8 overflow-hidden rounded-2xl border border-[#2C251D]/10 bg-[#1B3B6F] shadow-md">
           <img
-            src="/sadhguru.jpg"
+            src={bannerImageUrl}
             alt="Volunteering with Isha Kerala"
-            className="h-56 w-full object-cover object-center sm:h-64"
+            className="h-56 w-full object-cover object-center sm:h-72"
           />
         </div>
 
+        {/* Quote Block */}
         <blockquote className="mx-auto mt-8 max-w-xl text-center">
           <p className="text-base font-semibold leading-relaxed text-[#3A3228] sm:text-lg">
             &ldquo;Volunteering means to become willing, or in other words, to
@@ -94,6 +84,7 @@ export default async function KeralaVolunteeringPage() {
           </p>
         </blockquote>
 
+        {/* Submission Form */}
         <div className="mt-10">
           <VolunteeringInterestForm centers={centers} />
         </div>
