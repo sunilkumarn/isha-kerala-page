@@ -3,7 +3,6 @@ import { getPublicProgramsFromPublishedSessions } from "@/lib/public-programs";
 import PublicFooter from "@/components/public/PublicFooter";
 import NeedAssistanceSection from "@/components/public/NeedAssistanceSection";
 import ProgramsGridWithPagination from "@/components/public/ProgramsGridWithPagination";
-import FirstSevenDaysSlideshow from "@/components/public/FirstSevenDaysSlideshow";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -63,9 +62,7 @@ export default async function ProgramsPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl space-y-10 px-6 py-12">
-          <FirstSevenDaysSlideshow fallbackPrograms={programs} />
-
+        <section className="mx-auto max-w-6xl px-6 py-12">
           {errorMessage ? (
             <div className="rounded-xl border border-red-200 bg-white p-6 text-sm text-red-700">
               Failed to load programs: {errorMessage}

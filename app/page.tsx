@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import PublicFooter from "@/components/public/PublicFooter";
 import NeedAssistanceSection from "@/components/public/NeedAssistanceSection";
+import FirstSevenDaysSlideshow from "@/components/public/FirstSevenDaysSlideshow";
 
 export const metadata = {
   title: "Isha Kerala | Programs, Volunteering & Centers",
@@ -78,8 +79,10 @@ export default async function HomeLandingPage() {
           </div>
         </section>
 
-        {/* Three Major Blocks */}
-        <section className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
+        {/* First 7 Days Slideshow & Three Major Blocks */}
+        <section className="mx-auto max-w-6xl space-y-12 px-6 py-14 sm:py-20">
+          <FirstSevenDaysSlideshow />
+
           <div className="grid gap-8 md:grid-cols-3">
             {LANDING_BLOCKS.map((block) => (
               <div
