@@ -243,8 +243,8 @@ export default function FirstSevenDaysSlideshow({
     setActiveIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
   };
 
-  const uniformPanelClass =
-    "relative flex h-64 w-full items-center justify-center overflow-hidden rounded-2xl border border-[#1F2A63]/10 bg-[#FAF8F4]/90 shadow-2xs backdrop-blur-[2px] sm:h-72";
+  const uniformHeightClass = "h-64 w-full sm:h-72";
+  const imageCardClass = `relative flex ${uniformHeightClass} items-center justify-center overflow-hidden rounded-2xl border border-[#1F2A63]/10 bg-[#FAF8F4]/90 shadow-2xs backdrop-blur-[2px]`;
 
   const slideContent = (
     <div
@@ -252,14 +252,16 @@ export default function FirstSevenDaysSlideshow({
         current.image_url ? "md:grid-cols-3" : "md:grid-cols-2"
       }`}
     >
-      {/* Block 1: Animated 7-Days Banner Image */}
-      <div className={`${uniformPanelClass} p-4`}>
+      {/* Block 1: Animated 7-Days Banner Image (No Background Box) */}
+      <div
+        className={`relative flex ${uniformHeightClass} items-center justify-center overflow-hidden p-4`}
+      >
         <div
           aria-hidden="true"
           className="seven-days-glow absolute h-36 w-36 rounded-full bg-[#F28C18]/25 blur-2xl"
         />
         <img
-          src="/7days-bg.jpeg"
+          src="/7days-bg.png"
           alt="Upcoming programs in the next 7 days"
           className="seven-days-float relative z-10 h-full w-full rounded-xl object-contain transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-1"
         />
@@ -267,7 +269,7 @@ export default function FirstSevenDaysSlideshow({
 
       {/* Block 2: Program Image (when present) */}
       {current.image_url && (
-        <div className={uniformPanelClass}>
+        <div className={imageCardClass}>
           <img
             src={current.image_url}
             alt={current.name}
@@ -276,9 +278,9 @@ export default function FirstSevenDaysSlideshow({
         </div>
       )}
 
-      {/* Block 3: Dynamic Slide Details */}
+      {/* Block 3: Dynamic Slide Details (No Background Box) */}
       <div
-        className={`${uniformPanelClass} flex-col items-start justify-center p-5 text-left sm:p-6`}
+        className={`flex ${uniformHeightClass} flex-col items-start justify-center px-4 py-3 text-left sm:px-6`}
       >
         {current.centerName && (
           <h3 className="text-xl font-medium tracking-normal text-[#1F2A63] sm:text-2xl">
@@ -317,7 +319,7 @@ export default function FirstSevenDaysSlideshow({
     </div>
   );
 
- return (
+  return (
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -329,7 +331,7 @@ export default function FirstSevenDaysSlideshow({
         alt=""
         aria-hidden="true"
         onError={() => console.error("Failed to load /bg.jpeg")}
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill opacity-50"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill opacity-100"
       />
 
       <div className="relative z-10">
