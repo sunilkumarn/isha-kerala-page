@@ -243,10 +243,17 @@ export default function FirstSevenDaysSlideshow({
     setActiveIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
   };
 
+  const uniformPanelClass =
+    "relative flex h-64 w-full items-center justify-center overflow-hidden rounded-2xl border border-[#1F2A63]/10 bg-[#FAF8F4]/90 shadow-2xs backdrop-blur-[2px] sm:h-72";
+
   const slideContent = (
-    <div className="group grid items-center gap-6 md:grid-cols-12">
-      {/* Animated 7-Days Banner Image */}
-      <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl bg-[#FAF8F4]/85 p-3 md:col-span-4">
+    <div
+      className={`group grid items-stretch gap-6 ${
+        current.image_url ? "md:grid-cols-3" : "md:grid-cols-2"
+      }`}
+    >
+      {/* Block 1: Animated 7-Days Banner Image */}
+      <div className={`${uniformPanelClass} p-4`}>
         <div
           aria-hidden="true"
           className="seven-days-glow absolute h-36 w-36 rounded-full bg-[#F28C18]/25 blur-2xl"
@@ -258,8 +265,9 @@ export default function FirstSevenDaysSlideshow({
         />
       </div>
 
+      {/* Block 2: Program Image (when present) */}
       {current.image_url && (
-        <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#FAF8F4]/85 md:col-span-3">
+        <div className={uniformPanelClass}>
           <img
             src={current.image_url}
             alt={current.name}
@@ -268,11 +276,9 @@ export default function FirstSevenDaysSlideshow({
         </div>
       )}
 
-      {/* Dynamic Slide Details on Warm Cream Surface */}
+      {/* Block 3: Dynamic Slide Details */}
       <div
-        className={`rounded-2xl border border-[#1F2A63]/10 bg-[#FAF8F4]/90 p-5 shadow-2xs backdrop-blur-[2px] sm:p-6 ${
-          current.image_url ? "md:col-span-5" : "md:col-span-8"
-        }`}
+        className={`${uniformPanelClass} flex-col items-start justify-center p-5 text-left sm:p-6`}
       >
         {current.centerName && (
           <h3 className="text-xl font-medium tracking-normal text-[#1F2A63] sm:text-2xl">
@@ -293,17 +299,17 @@ export default function FirstSevenDaysSlideshow({
           )}
         </div>
 
-        <p className="mt-3 text-lg font-medium tracking-normal text-slate-900 transition group-hover:text-[#F28C18] sm:text-xl">
+        <p className="mt-3 line-clamp-2 text-lg font-medium tracking-normal text-slate-900 transition group-hover:text-[#F28C18] sm:text-xl">
           {current.name}
         </p>
 
         {current.sub_text && (
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">
             {current.sub_text}
           </p>
         )}
 
-        <div className="mt-5 inline-flex items-center gap-1.5 text-xs font-medium text-[#1F2A63] underline underline-offset-4 group-hover:text-[#F28C18]">
+        <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-[#1F2A63] underline underline-offset-4 group-hover:text-[#F28C18]">
           <span>Explore Program</span>
           <span aria-hidden="true">→</span>
         </div>
