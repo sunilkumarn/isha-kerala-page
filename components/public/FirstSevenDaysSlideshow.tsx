@@ -317,21 +317,19 @@ export default function FirstSevenDaysSlideshow({
     </div>
   );
 
-  return (
+ return (
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative overflow-hidden rounded-3xl border border-black/10 bg-white p-6 shadow-sm sm:p-8"
+      className="relative overflow-hidden rounded-3xl border border-black/10 p-6 shadow-sm sm:p-8"
     >
-      {/* Full Rangoli Background at 70% Opacity */}
-      <div
+      {/* Background Image Layer */}
+      <img
+        src="/bg.jpeg"
+        alt=""
         aria-hidden="true"
-        style={{ backgroundImage: "url('/rangoli-full.png')" }}
-        className="pointer-events-none absolute inset-0 bg-center bg-no-repeat bg-contain opacity-70"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-white/45"
+        onError={() => console.error("Failed to load /bg.jpeg")}
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill opacity-50"
       />
 
       <div className="relative z-10">
