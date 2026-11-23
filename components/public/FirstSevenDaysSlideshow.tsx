@@ -244,17 +244,16 @@ export default function FirstSevenDaysSlideshow({
   };
 
   const uniformHeightClass = "h-64 w-full sm:h-72";
-  const imageCardClass = `relative flex ${uniformHeightClass} items-center justify-center overflow-hidden rounded-2xl border border-[#1F2A63]/10 bg-[#FAF8F4]/90 shadow-2xs backdrop-blur-[2px]`;
 
   const slideContent = (
     <div
-      className={`group grid items-stretch gap-6 ${
+      className={`group grid items-stretch gap-0 ${
         current.image_url ? "md:grid-cols-3" : "md:grid-cols-2"
       }`}
     >
       {/* Block 1: Animated 7-Days Banner Image (No Background Box) */}
       <div
-        className={`relative flex ${uniformHeightClass} items-center justify-center overflow-hidden p-4`}
+        className={`relative flex ${uniformHeightClass} items-center justify-center overflow-hidden p-4 md:pr-6`}
       >
         <div
           aria-hidden="true"
@@ -267,9 +266,11 @@ export default function FirstSevenDaysSlideshow({
         />
       </div>
 
-      {/* Block 2: Program Image (when present) */}
+      {/* Block 2: Program Image (Joined Seamlessly to Right Text Block) */}
       {current.image_url && (
-        <div className={imageCardClass}>
+        <div
+          className={`relative flex ${uniformHeightClass} items-center justify-center overflow-hidden rounded-t-2xl border border-b-0 border-[#1F2A63]/10 bg-[#FAF8F4]/90 shadow-2xs backdrop-blur-[2px] md:rounded-l-2xl md:rounded-tr-none md:border-b md:border-r-0`}
+        >
           <img
             src={current.image_url}
             alt={current.name}
@@ -278,9 +279,13 @@ export default function FirstSevenDaysSlideshow({
         </div>
       )}
 
-      {/* Block 3: Dynamic Slide Details (No Background Box) */}
+      {/* Block 3: Dynamic Slide Details with Warm Cream Background (No Gap) */}
       <div
-        className={`flex ${uniformHeightClass} flex-col items-start justify-center px-4 py-3 text-left sm:px-6`}
+        className={`flex ${uniformHeightClass} flex-col items-start justify-center border border-[#1F2A63]/10 bg-[#FAF8F4]/90 px-5 py-4 text-left shadow-2xs backdrop-blur-[2px] sm:px-6 ${
+          current.image_url
+            ? "rounded-b-2xl md:rounded-r-2xl md:rounded-bl-none"
+            : "rounded-2xl"
+        }`}
       >
         {current.centerName && (
           <h3 className="text-xl font-medium tracking-normal text-[#1F2A63] sm:text-2xl">
@@ -323,7 +328,7 @@ export default function FirstSevenDaysSlideshow({
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative overflow-hidden rounded-3xl border border-black/10 p-6 shadow-sm sm:p-8"
+      className="relative overflow-hidden rounded-3xl border border-black/10 bg-[#FAF8F4] p-6 shadow-sm sm:p-8"
     >
       {/* Background Image Layer */}
       <img
@@ -331,7 +336,7 @@ export default function FirstSevenDaysSlideshow({
         alt=""
         aria-hidden="true"
         onError={() => console.error("Failed to load /bg.jpeg")}
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill opacity-100"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center opacity-60"
       />
 
       <div className="relative z-10">
