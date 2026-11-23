@@ -269,7 +269,7 @@ export default function FirstSevenDaysSlideshow({
       {/* Block 2: Program Image (Joined Seamlessly to Right Text Block) */}
       {current.image_url && (
         <div
-          className={`relative flex ${uniformHeightClass} items-center justify-center overflow-hidden rounded-t-2xl border border-b-0 border-[#1F2A63]/10 bg-[#FAF8F4]/90 shadow-2xs backdrop-blur-[2px] md:rounded-l-2xl md:rounded-tr-none md:border-b md:border-r-0`}
+          className={`relative flex ${uniformHeightClass} items-center justify-center overflow-hidden rounded-t-2xl border border-b-0 border-[#1F2A63]/10 bg-[#F5F1E6] shadow-2xs md:rounded-l-2xl md:rounded-tr-none md:border-b md:border-r-0`}
         >
           <img
             src={current.image_url}
@@ -279,9 +279,9 @@ export default function FirstSevenDaysSlideshow({
         </div>
       )}
 
-      {/* Block 3: Dynamic Slide Details with Warm Cream Background (No Gap) */}
+      {/* Block 3: Dynamic Slide Details (No Gap) */}
       <div
-        className={`flex ${uniformHeightClass} flex-col items-start justify-center border border-[#1F2A63]/10 bg-[#FAF8F4]/90 px-5 py-4 text-left shadow-2xs backdrop-blur-[2px] sm:px-6 ${
+        className={`flex ${uniformHeightClass} flex-col items-start justify-center border border-[#1F2A63]/10 bg-[#F5F1E6] px-5 py-4 text-left shadow-2xs sm:px-6 ${
           current.image_url
             ? "rounded-b-2xl md:rounded-r-2xl md:rounded-bl-none"
             : "rounded-2xl"
@@ -328,29 +328,20 @@ export default function FirstSevenDaysSlideshow({
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative overflow-hidden rounded-3xl border border-black/10 bg-[#FAF8F4] p-6 shadow-sm sm:p-8"
+      className="relative overflow-hidden rounded-3xl border border-[#1F2A63]/15 bg-[#F5F1E6] p-6 text-slate-900 shadow-sm sm:p-8"
     >
-      {/* Background Image Layer */}
-      <img
-        src="/bg.jpeg"
-        alt=""
-        aria-hidden="true"
-        onError={() => console.error("Failed to load /bg.jpeg")}
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center opacity-60"
-      />
-
       <div className="relative z-10">
         <div className="mb-4 flex items-center justify-end gap-3">
           {slides.length > 1 && (
             <>
-              <span className="mr-1 text-lg font-medium text-slate-600">
+              <span className="mr-1 text-lg font-medium text-[#1F2A63]/80">
                 {activeIndex + 1} / {slides.length}
               </span>
               <button
                 type="button"
                 onClick={handlePrev}
                 aria-label="Previous program"
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
+                className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#1F2A63]/20 bg-white text-[#1F2A63] transition hover:bg-[#FAF8F4] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -418,7 +409,7 @@ export default function FirstSevenDaysSlideshow({
                 className={`h-2 rounded-full transition-all ${
                   idx === activeIndex
                     ? "w-6 bg-[#F28C18]"
-                    : "w-2 bg-slate-300 hover:bg-slate-400"
+                    : "w-2 bg-[#1F2A63]/25 hover:bg-[#1F2A63]/45"
                 }`}
               />
             ))}
