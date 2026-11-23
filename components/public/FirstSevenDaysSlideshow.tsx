@@ -340,25 +340,25 @@ export default function FirstSevenDaysSlideshow({
       />
 
       <div className="relative z-10">
-        <div className="mb-4 flex items-center justify-end gap-2">
+        <div className="mb-4 flex items-center justify-end gap-3">
           {slides.length > 1 && (
             <>
-              <span className="mr-1 text-xs font-medium text-slate-500">
+              <span className="mr-1 text-lg font-medium text-slate-600">
                 {activeIndex + 1} / {slides.length}
               </span>
               <button
                 type="button"
                 onClick={handlePrev}
                 aria-label="Previous program"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
+                className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
               >
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
                   aria-hidden="true"
-                  className="h-4 w-4"
+                  className="h-6 w-6"
                 >
                   <path
                     strokeLinecap="round"
@@ -371,15 +371,15 @@ export default function FirstSevenDaysSlideshow({
                 type="button"
                 onClick={handleNext}
                 aria-label="Next program"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#1F2A63] text-white transition hover:bg-[#161e47] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
+                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#1F2A63] text-white transition hover:bg-[#161e47] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
               >
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
                   aria-hidden="true"
-                  className="h-4 w-4"
+                  className="h-6 w-6"
                 >
                   <path
                     strokeLinecap="round"
