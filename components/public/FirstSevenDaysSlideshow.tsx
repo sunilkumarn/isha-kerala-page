@@ -244,56 +244,63 @@ export default function FirstSevenDaysSlideshow({
   };
 
   const slideContent = (
-    <div className="group relative overflow-hidden rounded-3xl border border-black/10 bg-white shadow-sm transition hover:shadow-md">
-      <div className="grid items-center md:grid-cols-12">
-        {current.image_url && (
-          <div className="aspect-[4/3] w-full overflow-hidden bg-[#FAF8F4] md:col-span-5">
-            <img
-              src={current.image_url}
-              alt={current.name}
-              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-            />
-          </div>
+    <div className="group grid items-center gap-6 md:grid-cols-12">
+      {/* Animated 7-Days Banner Image */}
+      <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl bg-[#FAF8F4] p-3 md:col-span-4">
+        <div
+          aria-hidden="true"
+          className="seven-days-glow absolute h-36 w-36 rounded-full bg-[#F28C18]/25 blur-2xl"
+        />
+        <img
+          src="/7days.jpg"
+          alt="Upcoming programs in the next 7 days"
+          className="seven-days-float relative z-10 h-full w-full rounded-xl object-contain transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-1"
+        />
+      </div>
+
+      {current.image_url && (
+        <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#FAF8F4] md:col-span-3">
+          <img
+            src={current.image_url}
+            alt={current.name}
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          />
+        </div>
+      )}
+
+      <div className={current.image_url ? "md:col-span-5" : "md:col-span-8"}>
+        {current.centerName && (
+          <h3 className="text-xl font-medium tracking-normal text-[#1F2A63] sm:text-2xl">
+            {current.centerName}
+          </h3>
         )}
 
         <div
-          className={`p-6 sm:p-8 ${
-            current.image_url ? "md:col-span-7" : "md:col-span-12"
+          className={`flex flex-wrap items-center gap-2 text-xs font-medium ${
+            current.centerName ? "mt-2" : ""
           }`}
         >
-          {current.centerName && (
-            <h3 className="text-lg font-medium tracking-normal text-[#1F2A63] sm:text-xl">
-              {current.centerName}
-            </h3>
+          <span className="rounded-full bg-[#F28C18]/15 px-3 py-0.5 text-[#9A5200]">
+            Next 7 Days
+          </span>
+          {formattedDate && (
+            <span className="text-[#1F2A63]">{formattedDate}</span>
           )}
+        </div>
 
-          <div
-            className={`flex flex-wrap items-center gap-2 text-xs font-medium ${
-              current.centerName ? "mt-2" : ""
-            }`}
-          >
-            <span className="rounded-full bg-[#F28C18]/15 px-3 py-0.5 text-[#9A5200]">
-              Next 7 Days
-            </span>
-            {formattedDate && (
-              <span className="text-[#1F2A63]">{formattedDate}</span>
-            )}
-          </div>
+        <p className="mt-3 text-lg font-medium tracking-normal text-slate-900 transition group-hover:text-[#F28C18] sm:text-xl">
+          {current.name}
+        </p>
 
-          <p className="mt-3 text-xl font-medium tracking-normal text-slate-900 transition group-hover:text-[#F28C18] sm:text-2xl">
-            {current.name}
+        {current.sub_text && (
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            {current.sub_text}
           </p>
+        )}
 
-          {current.sub_text && (
-            <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              {current.sub_text}
-            </p>
-          )}
-
-          <div className="mt-5 inline-flex items-center gap-1.5 text-xs font-medium text-[#1F2A63] underline underline-offset-4 group-hover:text-[#F28C18]">
-            <span>Explore Program</span>
-            <span aria-hidden="true">→</span>
-          </div>
+        <div className="mt-5 inline-flex items-center gap-1.5 text-xs font-medium text-[#1F2A63] underline underline-offset-4 group-hover:text-[#F28C18]">
+          <span>Explore Program</span>
+          <span aria-hidden="true">→</span>
         </div>
       </div>
     </div>
@@ -303,35 +310,96 @@ export default function FirstSevenDaysSlideshow({
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="space-y-3"
+      className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm sm:p-8"
     >
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-medium tracking-normal text-[#1F2A63] sm:text-lg">
-          Starting in 7 Days
-        </h2>
+      <style jsx>{`
+        @keyframes sevenDaysFloat {
+          0%,
+          100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-6px) rotate(1.2deg);
+          }
+        }
 
+        @keyframes sevenDaysAura {
+          0%,
+          100% {
+            transform: scale(0.92);
+            opacity: 0.45;
+          }
+          50% {
+            transform: scale(1.12);
+            opacity: 0.85;
+          }
+        }
+
+        .seven-days-float {
+          animation: sevenDaysFloat 3.4s ease-in-out infinite;
+        }
+
+        .seven-days-glow {
+          animation: sevenDaysAura 3.4s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .seven-days-float,
+          .seven-days-glow {
+            animation: none;
+          }
+        }
+      `}</style>
+
+      <div className="mb-4 flex items-center justify-end gap-2">
         {slides.length > 1 && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-500">
+          <>
+            <span className="mr-1 text-xs font-medium text-slate-500">
               {activeIndex + 1} / {slides.length}
             </span>
             <button
               type="button"
               onClick={handlePrev}
               aria-label="Previous program"
-              className="rounded-full border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
             >
-              Prev
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+                className="h-4 w-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m15 18-6-6 6-6"
+                />
+              </svg>
             </button>
             <button
               type="button"
               onClick={handleNext}
               aria-label="Next program"
-              className="rounded-full bg-[#1F2A63] px-3.5 py-1.5 text-xs font-medium text-white transition hover:bg-[#161e47]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#1F2A63] text-white transition hover:bg-[#161e47] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
             >
-              Next
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+                className="h-4 w-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m9 18 6-6-6-6"
+                />
+              </svg>
             </button>
-          </div>
+          </>
         )}
       </div>
 
@@ -351,7 +419,7 @@ export default function FirstSevenDaysSlideshow({
       )}
 
       {slides.length > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-1">
+        <div className="mt-6 flex items-center justify-center gap-2">
           {slides.map((item, idx) => (
             <button
               key={`${item.id}-${item.sessionDate ?? idx}-${item.centerName ?? ""}`}
