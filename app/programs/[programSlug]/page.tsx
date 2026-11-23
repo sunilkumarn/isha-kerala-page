@@ -35,14 +35,21 @@ function getTodayLocalISODate() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function formatStartDate(dateStr: string | null | undefined) {
+  if (!dateStr) return null;
+  const parsed = new Date(`${dateStr.slice(0, 10)}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 function looksLikeUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
     value
   );
-}
-
-function normalizeSlug(value: string) {
-  return decodeURIComponent(value).trim().toLowerCase();
 }
 
 export default async function ProgramVenuesPage({
@@ -58,44 +65,45 @@ export default async function ProgramVenuesPage({
 
   let program: Program | null = null;
 
-    const { data: programBySlugRows, error: programBySlugError } = await supabase
-      .from("programs")
-      .select("id, name, slug")
-      .eq("slug", programSlug)
-      .order("id", { ascending: true })
-      .limit(1);
+  const { data: programBySlugRows, error: programBySlugError } = await supabase
+    .from("programs")
+    .select("id, name, slug")
+    .eq("slug", programSlug)
+    .order("id", { ascending: true })
+    .limit(1);
 
-    if (programBySlugError) {
-      console.error("Failed to load program by slug:", programBySlugError);
-      notFound();
-    }
+  if (programBySlugError) {
+    console.error("Failed to load program by slug:", programBySlugError);
+    notFound();
+  }
 
-    const { data: programByIdRows, error: programByIdError } = lookupByIdFirst
-      ? await supabase
-          .from("programs")
-          .select("id, name, slug")
-          .eq("id", programSlug)
-          .order("id", { ascending: true })
-          .limit(1)
-      : { data: null, error: null };
+  const { data: programByIdRows, error: programByIdError } = lookupByIdFirst
+    ? await supabase
+        .from("programs")
+        .select("id, name, slug")
+        .eq("id", programSlug)
+        .order("id", { ascending: true })
+        .limit(1)
+    : { data: null, error: null };
 
-    if (programByIdError) {
-      console.error("Failed to load program by id:", programByIdError);
-      notFound();
-    }
+  if (programByIdError) {
+    console.error("Failed to load program by id:", programByIdError);
+    notFound();
+  }
 
-    const programBySlug = (programBySlugRows?.[0] ?? null) as Program | null;
-    const programById = (programByIdRows?.[0] ?? null) as Program | null;
-    program = (programBySlug ?? programById) as Program | null;
-    if (!program) notFound();
+  const programBySlug = (programBySlugRows?.[0] ?? null) as Program | null;
+  const programById = (programByIdRows?.[0] ?? null) as Program | null;
+  program = (programBySlug ?? programById) as Program | null;
+  if (!program) notFound();
 
-    // Backwards compatibility: old URLs used /programs/:programId
-    // If we were hit with an ID, redirect to the canonical slug URL.
-    if (lookupByIdFirst && program.slug && programSlug !== program.slug) {
-      redirect(`/programs/${encodeURIComponent(program.slug)}`);
-    }
+  // Backwards compatibility: old URLs used /programs/:programId
+  // If we were hit with an ID, redirect to the canonical slug URL.
+  if (lookupByIdFirst && program.slug && programSlug !== program.slug) {
+    redirect(`/programs/${encodeURIComponent(program.slug)}`);
+  }
 
   let venues: Venue[] = [];
+  const venueStartDateMap = new Map<string, string>();
 
   const programId = (program as Program).id;
 
@@ -115,20 +123,28 @@ export default async function ProgramVenuesPage({
   if (programIds.length > 0) {
     const { data: sessionVenueRows, error: sessionsError } = await supabase
       .from("sessions")
-      .select("venue_id")
+      .select("venue_id, start_date")
       .in("program_id", programIds)
       .eq("is_published", true)
       .gte("start_date", today)
-      .not("venue_id", "is", null);
+      .not("venue_id", "is", null)
+      .order("start_date", { ascending: true });
 
     if (sessionsError) {
       console.error("Failed to load sessions:", sessionsError);
       throw new Error(sessionsError.message);
     }
 
-    const venueIds = Array.from(
-      new Set((sessionVenueRows ?? []).map((row) => row.venue_id).filter(Boolean))
-    ) as Array<string | number>;
+    for (const row of sessionVenueRows ?? []) {
+      if (!row.venue_id || !row.start_date) continue;
+      const key = String(row.venue_id);
+      const existing = venueStartDateMap.get(key);
+      if (!existing || row.start_date < existing) {
+        venueStartDateMap.set(key, row.start_date);
+      }
+    }
+
+    const venueIds = Array.from(venueStartDateMap.keys());
 
     if (venueIds.length > 0) {
       const { data: venueRows, error: venuesError } = await supabase
@@ -154,6 +170,7 @@ export default async function ProgramVenuesPage({
       updatedAt: string | null;
       slug: string;
       slugSource: "db" | "derived";
+      earliestStartDate: string | null;
     };
 
     const map = new Map<string, CityCard>();
@@ -162,11 +179,14 @@ export default async function ProgramVenuesPage({
       const cityName = venue.cities?.name?.trim() || "Other";
       const imageUrl = venue.cities?.image_url ?? null;
       const updatedAt = venue.cities?.updated_at ?? null;
-      const cityKey = venue.city_id ? `city:${String(venue.city_id)}` : `name:${cityName}`;
+      const cityKey = venue.city_id
+        ? `city:${String(venue.city_id)}`
+        : `name:${cityName}`;
       const derivedSlug = slugify(cityName);
       const dbCitySlug = venue.cities?.slug?.trim() || "";
       const citySlug = dbCitySlug || derivedSlug;
       const slugSource: CityCard["slugSource"] = dbCitySlug ? "db" : "derived";
+      const venueStartDate = venueStartDateMap.get(String(venue.id)) ?? null;
 
       const existing = map.get(cityKey);
       if (!existing) {
@@ -177,17 +197,34 @@ export default async function ProgramVenuesPage({
           updatedAt,
           slug: citySlug,
           slugSource,
+          earliestStartDate: venueStartDate,
         });
         continue;
       }
 
-      if (existing.slugSource === "derived" && slugSource === "db" && existing.slug !== citySlug) {
-        map.set(cityKey, { ...existing, slug: citySlug, slugSource: "db" });
-      }
+      const nextStartDate =
+        existing.earliestStartDate && venueStartDate
+          ? existing.earliestStartDate < venueStartDate
+            ? existing.earliestStartDate
+            : venueStartDate
+          : existing.earliestStartDate ?? venueStartDate;
 
-      if (!existing.imageUrl && imageUrl) {
-        map.set(cityKey, { ...existing, imageUrl, updatedAt: existing.updatedAt ?? updatedAt });
-      }
+      map.set(cityKey, {
+        ...existing,
+        slug:
+          existing.slugSource === "derived" &&
+          slugSource === "db" &&
+          existing.slug !== citySlug
+            ? citySlug
+            : existing.slug,
+        slugSource:
+          existing.slugSource === "derived" && slugSource === "db"
+            ? "db"
+            : existing.slugSource,
+        imageUrl: existing.imageUrl ?? imageUrl,
+        updatedAt: existing.updatedAt ?? updatedAt,
+        earliestStartDate: nextStartDate,
+      });
     }
 
     return Array.from(map.values()).sort((a, b) =>
@@ -208,8 +245,8 @@ export default async function ProgramVenuesPage({
               Back to All Programs
             </Link>
 
-            <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
-              { `${(program as Program).name}`}
+            <h1 className="mt-6 text-4xl font-medium tracking-normal md:text-5xl">
+              {`${(program as Program).name}`}
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-white/80 md:text-base">
               Select your city to explore upcoming sessions
@@ -226,48 +263,66 @@ export default async function ProgramVenuesPage({
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {cityCards.map((city) => (
-                <div
-                  key={city.cityKey}
-                  className="overflow-hidden rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm"
-                >
-                  <div className="-mx-8 -mt-8 mb-6">
-                    <div
-                      className="relative aspect-[4/3] w-full bg-slate-100 bg-cover bg-center bg-no-repeat"
-                      style={{
-                        backgroundImage: `url("${
-                          city.imageUrl
-                            ? `${city.imageUrl}${city.imageUrl.includes("?") ? "&" : "?"}v=${encodeURIComponent(
-                                city.updatedAt ?? ""
-                              )}`
-                            : "/city-image.jpeg"
-                        }")`, 
-                      }}
-                    >
-                      <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className={`font-semibold text-slate-700 mt-15 tracking-tight ${
-                      city.cityName.length > 15 
-                      ? 'text-xl sm:text-2xl tracking-tighter' 
-                      : 'text-3xl'
-                      }`}>
-                      {city.cityName}
-                    </div>
+              {cityCards.map((city) => {
+                const formattedStart = formatStartDate(city.earliestStartDate);
+
+                return (
+                  <div
+                    key={city.cityKey}
+                    className="flex flex-col justify-between overflow-hidden rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm"
+                  >
+                    <div>
+                      <div className="-mx-8 -mt-8 mb-6">
+                        <div
+                          className="relative aspect-[4/3] w-full bg-slate-100 bg-cover bg-center bg-no-repeat"
+                          style={{
+                            backgroundImage: `url("${
+                              city.imageUrl
+                                ? `${city.imageUrl}${
+                                    city.imageUrl.includes("?") ? "&" : "?"
+                                  }v=${encodeURIComponent(city.updatedAt ?? "")}`
+                                : "/city-image.jpeg"
+                            }")`,
+                          }}
+                        >
+                          <div
+                            className="absolute inset-0 bg-white/60"
+                            aria-hidden="true"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div
+                              className={`mt-15 font-medium tracking-normal text-slate-700 ${
+                                city.cityName.length > 15
+                                  ? "text-xl sm:text-2xl"
+                                  : "text-3xl"
+                              }`}
+                            >
+                              {city.cityName}
+                            </div>
+                          </div>
+                        </div>
                       </div>
+
+                      {formattedStart && (
+                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#FAF4E8] px-3.5 py-1 text-xs font-medium tracking-normal text-[#1F2A63]">
+                          <span>Starts {formattedStart}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-5">
+                      <Link
+                        href={`/programs/${encodeURIComponent(
+                          (program as Program).slug
+                        )}/centers/${encodeURIComponent(city.slug)}`}
+                        className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-6 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-orange-600"
+                      >
+                        View details
+                      </Link>
                     </div>
                   </div>
-                  <div className="mt-5">
-                    <Link
-                      href={`/programs/${encodeURIComponent(
-                        (program as Program).slug
-                      )}/centers/${encodeURIComponent(city.slug)}`}
-                      className="inline-flex items-center justify-center rounded-full bg-[#F28C18] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
-                    >
-                      View details
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
@@ -277,5 +332,3 @@ export default async function ProgramVenuesPage({
     </div>
   );
 }
-
-
