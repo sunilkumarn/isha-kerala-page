@@ -248,28 +248,13 @@ export default function FirstSevenDaysSlideshow({
   const slideContent = (
     <div
       className={`group grid items-stretch gap-0 ${
-        current.image_url ? "md:grid-cols-3" : "md:grid-cols-2"
+        current.image_url ? "md:grid-cols-3" : "md:grid-cols-1"
       }`}
     >
-      {/* Block 1: Animated 7-Days Banner Image (No Background Box) */}
-      <div
-        className={`relative flex ${uniformHeightClass} items-center justify-center overflow-hidden p-4 md:pr-6`}
-      >
-        <div
-          aria-hidden="true"
-          className="seven-days-glow absolute h-36 w-36 rounded-full bg-[#F28C18]/25 blur-2xl"
-        />
-        <img
-          src="/7days-bg.png"
-          alt="Upcoming programs in the next 7 days"
-          className="seven-days-float relative z-10 h-full w-full rounded-xl object-contain transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-1"
-        />
-      </div>
-
-      {/* Block 2: Program Image (Joined Seamlessly to Right Text Block) */}
+      {/* Image Block: 2/3 Width on Desktop, Joined Seamlessly to Text Block */}
       {current.image_url && (
         <div
-          className={`relative flex ${uniformHeightClass} items-center justify-center overflow-hidden rounded-t-2xl border border-b-0 border-[#1F2A63]/10 bg-[#F5F1E6] shadow-2xs md:rounded-l-2xl md:rounded-tr-none md:border-b md:border-r-0`}
+          className={`relative flex ${uniformHeightClass} items-center justify-center overflow-hidden rounded-t-2xl border border-b-0 border-[#1F2A63]/10 bg-[#F5F1E6] shadow-2xs md:col-span-2 md:rounded-l-2xl md:rounded-tr-none md:border-b md:border-r-0`}
         >
           <img
             src={current.image_url}
@@ -279,11 +264,11 @@ export default function FirstSevenDaysSlideshow({
         </div>
       )}
 
-      {/* Block 3: Dynamic Slide Details (No Gap) */}
+      {/* Text Block: 1/3 Width on Desktop (No Gap) */}
       <div
         className={`flex ${uniformHeightClass} flex-col items-start justify-center border border-[#1F2A63]/10 bg-[#F5F1E6] px-5 py-4 text-left shadow-2xs sm:px-6 ${
           current.image_url
-            ? "rounded-b-2xl md:rounded-r-2xl md:rounded-bl-none"
+            ? "md:col-span-1 rounded-b-2xl md:rounded-r-2xl md:rounded-bl-none"
             : "rounded-2xl"
         }`}
       >
@@ -331,56 +316,62 @@ export default function FirstSevenDaysSlideshow({
       className="relative overflow-hidden rounded-3xl border border-[#1F2A63]/15 bg-[#F5F1E6] p-6 text-slate-900 shadow-sm sm:p-8"
     >
       <div className="relative z-10">
-        <div className="mb-4 flex items-center justify-end gap-3">
-          {slides.length > 1 && (
-            <>
-              <span className="mr-1 text-lg font-medium text-[#1F2A63]/80">
-                {activeIndex + 1} / {slides.length}
-              </span>
-              <button
-                type="button"
-                onClick={handlePrev}
-                aria-label="Previous program"
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#1F2A63]/20 bg-white text-[#1F2A63] transition hover:bg-[#FAF8F4] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  aria-hidden="true"
-                  className="h-6 w-6"
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-medium tracking-normal text-[#1F2A63] sm:text-2xl">
+            Upcoming Programs in 7 Days
+          </h2>
+
+          <div className="flex items-center gap-3">
+            {slides.length > 1 && (
+              <>
+                <span className="mr-1 text-lg font-medium text-[#1F2A63]/80">
+                  {activeIndex + 1} / {slides.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  aria-label="Previous program"
+                  className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#1F2A63]/20 bg-white text-[#1F2A63] transition hover:bg-[#FAF8F4] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m15 18-6-6 6-6"
-                  />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                aria-label="Next program"
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#1F2A63] text-white transition hover:bg-[#161e47] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  aria-hidden="true"
-                  className="h-6 w-6"
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    aria-hidden="true"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m15 18-6-6 6-6"
+                    />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  aria-label="Next program"
+                  className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#1F2A63] text-white transition hover:bg-[#161e47] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m9 18 6-6-6-6"
-                  />
-                </svg>
-              </button>
-            </>
-          )}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    aria-hidden="true"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m9 18 6-6-6-6"
+                    />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {isExternal ? (
@@ -416,45 +407,6 @@ export default function FirstSevenDaysSlideshow({
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        @keyframes sevenDaysFloat {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-6px) rotate(1.2deg);
-          }
-        }
-
-        @keyframes sevenDaysAura {
-          0%,
-          100% {
-            transform: scale(0.92);
-            opacity: 0.45;
-          }
-          50% {
-            transform: scale(1.12);
-            opacity: 0.85;
-          }
-        }
-
-        .seven-days-float {
-          animation: sevenDaysFloat 3.4s ease-in-out infinite;
-        }
-
-        .seven-days-glow {
-          animation: sevenDaysAura 3.4s ease-in-out infinite;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .seven-days-float,
-          .seven-days-glow {
-            animation: none;
-          }
-        }
-      `}</style>
     </div>
   );
 }
