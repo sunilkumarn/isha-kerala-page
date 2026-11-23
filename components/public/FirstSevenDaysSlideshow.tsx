@@ -246,20 +246,20 @@ export default function FirstSevenDaysSlideshow({
   const slideContent = (
     <div className="group grid items-center gap-6 md:grid-cols-12">
       {/* Animated 7-Days Banner Image */}
-      <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl bg-[#FAF8F4] p-3 md:col-span-4">
+      <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl bg-[#FAF8F4]/85 p-3 md:col-span-4">
         <div
           aria-hidden="true"
           className="seven-days-glow absolute h-36 w-36 rounded-full bg-[#F28C18]/25 blur-2xl"
         />
         <img
-          src="/7days.jpg"
+          src="/7days-bg.jpeg"
           alt="Upcoming programs in the next 7 days"
           className="seven-days-float relative z-10 h-full w-full rounded-xl object-contain transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-1"
         />
       </div>
 
       {current.image_url && (
-        <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#FAF8F4] md:col-span-3">
+        <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#FAF8F4]/85 md:col-span-3">
           <img
             src={current.image_url}
             alt={current.name}
@@ -268,7 +268,12 @@ export default function FirstSevenDaysSlideshow({
         </div>
       )}
 
-      <div className={current.image_url ? "md:col-span-5" : "md:col-span-8"}>
+      {/* Dynamic Slide Details on Warm Cream Surface */}
+      <div
+        className={`rounded-2xl border border-[#1F2A63]/10 bg-[#FAF8F4]/90 p-5 shadow-2xs backdrop-blur-[2px] sm:p-6 ${
+          current.image_url ? "md:col-span-5" : "md:col-span-8"
+        }`}
+      >
         {current.centerName && (
           <h3 className="text-xl font-medium tracking-normal text-[#1F2A63] sm:text-2xl">
             {current.centerName}
@@ -310,8 +315,106 @@ export default function FirstSevenDaysSlideshow({
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm sm:p-8"
+      className="relative overflow-hidden rounded-3xl border border-black/10 bg-white p-6 shadow-sm sm:p-8"
     >
+      {/* Full Rangoli Background at 70% Opacity */}
+      <div
+        aria-hidden="true"
+        style={{ backgroundImage: "url('/rangoli-full.png')" }}
+        className="pointer-events-none absolute inset-0 bg-center bg-no-repeat bg-contain opacity-70"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-white/45"
+      />
+
+      <div className="relative z-10">
+        <div className="mb-4 flex items-center justify-end gap-2">
+          {slides.length > 1 && (
+            <>
+              <span className="mr-1 text-xs font-medium text-slate-500">
+                {activeIndex + 1} / {slides.length}
+              </span>
+              <button
+                type="button"
+                onClick={handlePrev}
+                aria-label="Previous program"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                  className="h-4 w-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m15 18-6-6 6-6"
+                  />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                aria-label="Next program"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#1F2A63] text-white transition hover:bg-[#161e47] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                  className="h-4 w-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m9 18 6-6-6-6"
+                  />
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+
+        {isExternal ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block focus:outline-none"
+          >
+            {slideContent}
+          </a>
+        ) : (
+          <Link href={href} className="block focus:outline-none">
+            {slideContent}
+          </Link>
+        )}
+
+        {slides.length > 1 && (
+          <div className="mt-6 flex items-center justify-center gap-2">
+            {slides.map((item, idx) => (
+              <button
+                key={`${item.id}-${item.sessionDate ?? idx}-${item.centerName ?? ""}`}
+                type="button"
+                onClick={() => setActiveIndex(idx)}
+                aria-label={`Show ${item.name}`}
+                className={`h-2 rounded-full transition-all ${
+                  idx === activeIndex
+                    ? "w-6 bg-[#F28C18]"
+                    : "w-2 bg-slate-300 hover:bg-slate-400"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
       <style jsx>{`
         @keyframes sevenDaysFloat {
           0%,
@@ -350,91 +453,6 @@ export default function FirstSevenDaysSlideshow({
           }
         }
       `}</style>
-
-      <div className="mb-4 flex items-center justify-end gap-2">
-        {slides.length > 1 && (
-          <>
-            <span className="mr-1 text-xs font-medium text-slate-500">
-              {activeIndex + 1} / {slides.length}
-            </span>
-            <button
-              type="button"
-              onClick={handlePrev}
-              aria-label="Previous program"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-                className="h-4 w-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m15 18-6-6 6-6"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="Next program"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#1F2A63] text-white transition hover:bg-[#161e47] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2A63]/40"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-                className="h-4 w-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m9 18 6-6-6-6"
-                />
-              </svg>
-            </button>
-          </>
-        )}
-      </div>
-
-      {isExternal ? (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block focus:outline-none"
-        >
-          {slideContent}
-        </a>
-      ) : (
-        <Link href={href} className="block focus:outline-none">
-          {slideContent}
-        </Link>
-      )}
-
-      {slides.length > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-2">
-          {slides.map((item, idx) => (
-            <button
-              key={`${item.id}-${item.sessionDate ?? idx}-${item.centerName ?? ""}`}
-              type="button"
-              onClick={() => setActiveIndex(idx)}
-              aria-label={`Show ${item.name}`}
-              className={`h-2 rounded-full transition-all ${
-                idx === activeIndex
-                  ? "w-6 bg-[#F28C18]"
-                  : "w-2 bg-slate-300 hover:bg-slate-400"
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
